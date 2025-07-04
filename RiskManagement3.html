@@ -1,0 +1,4118 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Stock Market Portfolio Dashboard</title>
+      <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+      <style>
+         /* General Body and App Styling */
+         body {
+         background: linear-gradient(
+         135deg,
+         #23243a 0%,
+         #181c24 100%
+         ) !important;
+         color: #f2f2f2;
+         font-family: "Segoe UI", "Roboto", Arial, sans-serif;
+         margin: 0;
+         padding: 0;
+         min-height: 100vh;
+         transition: background 0.3s, color 0.3s;
+         padding-top: 0;
+         }
+         body.light-mode {
+         background: linear-gradient(
+         135deg,
+         #f5f7fa 0%,
+         #e3f0ff 100%
+         ) !important;
+         color: #23243a;
+         }
+         #app {
+         background: rgba(32, 34, 54, 0.98);
+         color: #f2f2f2;
+         border-radius: 1.2rem;
+         box-shadow: 0 0.4rem 3.2rem rgba(0, 0, 0, 0.45);
+         padding-bottom: 4vw;
+         padding-top: 2vw;
+         transition: background 0.3s, color 0.3s;
+         margin-top: 0;
+         margin-bottom: 0;
+         width: 96vw;
+         max-width: 1200px;
+         margin-left: auto;
+         margin-right: auto;
+         }
+         body.light-mode #app {
+         background: #fff;
+         color: #23243a;
+         box-shadow: 0 0.4rem 3.2rem rgba(180, 180, 180, 0.15);
+         }
+         body.light-mode,
+         body.light-mode * {
+         color: #23243a !important;
+         }
+         @media (max-width: 768px) {
+         #app {
+         margin-top: 0.5vw;
+         width: 99vw;
+         padding-left: 1vw;
+         padding-right: 1vw;
+         }
+         }
+         @media (max-width: 480px) {
+         #app {
+         margin-top: 0.5vw;
+         width: 100vw;
+         padding-left: 0.5vw;
+         padding-right: 0.5vw;
+         }
+         }
+         .dashboard-header {
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         margin-bottom: 3vw;
+         gap: 2vw;
+         flex-wrap: wrap;
+         position: relative;
+         }
+         .dashboard-header .logo {
+         height: 8vw;
+         max-width: 18vw;
+         object-fit: contain;
+         margin: 2vw 1vw 0 1vw;
+         transition: transform 0.2s, box-shadow 0.2s;
+         background: #23243a;
+         border-radius: 1.6rem;
+         filter: drop-shadow(0 0 1.6rem #000) drop-shadow(0 0.8vw 3.2vw #222);
+         display: block;
+         }
+         @media (max-width: 768px) {
+         .dashboard-header .logo {
+         height: 9vw;
+         max-width: 24vw;
+         margin: 2vw 1vw 0 1vw;
+         }
+         }
+         @media (max-width: 480px) {
+         .dashboard-header .logo {
+         height: 12vw;
+         max-width: 32vw;
+         margin: 2vw 1vw 0 1vw;
+         }
+         }
+         .dashboard-header h1 {
+         margin: 0 auto 0 0;
+         text-align: center;
+         color: #fff;
+         font-size: 2.2rem;
+         font-weight: 700;
+         padding: 1vw 3vw;
+         border-radius: 1.2rem;
+         background: linear-gradient(90deg, #23243a 80%, #2a2e3d 100%);
+         box-shadow: 0 0.2vw 1.6vw rgba(0, 0, 0, 0.25);
+         display: inline-block;
+         max-width: 90vw;
+         }
+         @media (max-width: 768px) {
+         .dashboard-header h1 {
+         font-size: 1.5rem;
+         padding: 1vw 2vw;
+         max-width: 98vw;
+         }
+         }
+         @media (max-width: 480px) {
+         .dashboard-header h1 {
+         font-size: 1.1rem;
+         padding: 1vw 1vw;
+         max-width: 99vw;
+         }
+         }
+         .branch-search-bar {
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+         gap: 0;
+         margin: 2vw 0 1vw 0;
+         flex-wrap: wrap;
+         background: rgba(245, 247, 250, 0.15);
+         border-radius: 1.2em;
+         box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+         padding: 0.7em 1.2em;
+         border: 1.5px solid #e3f0ff;
+         }
+         .branch-search-bar .bar-section {
+         display: flex;
+         align-items: center;
+         gap: 0.7em;
+         }
+         .branch-search-bar .bar-section.center {
+         flex: 1;
+         justify-content: center;
+         }
+         .branch-search-bar input {
+         padding: 0.7em 1.2em;
+         font-size: 1em;
+         border-radius: 0.8em;
+         border: 0.15em solid #bbb;
+         outline: none;
+         width: 18vw;
+         min-width: 120px;
+         max-width: 220px;
+         transition: border 0.2s;
+         }
+         .branch-search-bar input:focus {
+         border: 0.15em solid #3b7fc7;
+         box-shadow: 0 0 0 2px #b3d4fc44;
+         }
+         .branch-search-bar button {
+         padding: 0.7em 1.2em;
+         font-size: 1em;
+         border-radius: 0.8em;
+         background: #ffb300;
+         color: #23243a;
+         font-weight: 600;
+         border: none;
+         cursor: pointer;
+         transition: background 0.2s, color 0.2s;
+         }
+         .branch-search-bar button:hover {
+         background: #ffd600;
+         color: #23243a;
+         }
+         .branch-search-bar .refresh-icon {
+         font-size: 1.2em;
+         color: #3b7fc7;
+         margin-right: 0.2em;
+         }
+         .branch-search-bar select {
+         padding: 0.3em 0.7em;
+         border-radius: 0.5em;
+         font-size: 1em;
+         border: 1.2px solid #bbb;
+         background: #fff;
+         color: #23243a;
+         margin-left: 0.2em;
+         }
+         .branch-search-bar .theme-toggle-row {
+         display: flex;
+         align-items: center;
+         gap: 0.5em;
+         }
+         .branch-search-bar .theme-toggle {
+         display: flex;
+         align-items: center;
+         gap: 0.2em;
+         background: rgba(255, 255, 255, 0.12);
+         border-radius: 1em;
+         padding: 0.2em 0.7em;
+         }
+         .branch-search-bar .toggle-icon {
+         font-size: 1.2em;
+         }
+         .branch-search-bar .theme-switch {
+         position: relative;
+         display: inline-block;
+         width: 38px;
+         height: 22px;
+         }
+         .branch-search-bar .theme-switch input {
+         opacity: 0;
+         width: 0;
+         height: 0;
+         }
+         .branch-search-bar .theme-slider {
+         position: absolute;
+         cursor: pointer;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         background-color: #ccc;
+         border-radius: 22px;
+         transition: 0.4s;
+         }
+         .branch-search-bar .theme-switch input:checked + .theme-slider {
+         background-color: #3b7fc7;
+         }
+         .branch-search-bar .theme-slider:before {
+         position: absolute;
+         content: "";
+         height: 16px;
+         width: 16px;
+         left: 3px;
+         bottom: 3px;
+         background-color: white;
+         border-radius: 50%;
+         transition: 0.4s;
+         }
+         .branch-search-bar .theme-switch input:checked + .theme-slider:before {
+         transform: translateX(16px);
+         }
+         @media (max-width: 900px) {
+         .branch-search-bar {
+         flex-direction: column;
+         gap: 1em;
+         align-items: stretch;
+         }
+         .branch-search-bar .bar-section.center {
+         justify-content: flex-start;
+         }
+         }
+         .dashboard-header {
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         margin-bottom: 3vw;
+         gap: 2vw;
+         flex-wrap: wrap;
+         position: relative;
+         }
+         .dashboard-header .logo {
+         height: 8vw;
+         max-width: 18vw;
+         object-fit: contain;
+         margin: 2vw 1vw 0 1vw;
+         transition: transform 0.2s, box-shadow 0.2s;
+         background: #23243a;
+         border-radius: 1.6rem;
+         filter: drop-shadow(0 0 1.6rem #000) drop-shadow(0 0.8vw 3.2vw #222);
+         display: block;
+         }
+         @media (max-width: 768px) {
+         .dashboard-header .logo {
+         height: 9vw;
+         max-width: 24vw;
+         margin: 2vw 1vw 0 1vw;
+         }
+         }
+         @media (max-width: 480px) {
+         .dashboard-header .logo {
+         height: 12vw;
+         max-width: 32vw;
+         margin: 2vw 1vw 0 1vw;
+         }
+         }
+         .dashboard-header h1 {
+         margin: 0 auto 0 0;
+         text-align: center;
+         color: #fff;
+         font-size: 2.2rem;
+         font-weight: 700;
+         padding: 1vw 3vw;
+         border-radius: 1.2rem;
+         background: linear-gradient(90deg, #23243a 80%, #2a2e3d 100%);
+         box-shadow: 0 0.2vw 1.6vw rgba(0, 0, 0, 0.25);
+         display: inline-block;
+         max-width: 90vw;
+         }
+         @media (max-width: 768px) {
+         .dashboard-header h1 {
+         font-size: 1.5rem;
+         padding: 1vw 2vw;
+         max-width: 98vw;
+         }
+         }
+         @media (max-width: 480px) {
+         .dashboard-header h1 {
+         font-size: 1.1rem;
+         padding: 1vw 1vw;
+         max-width: 99vw;
+         }
+         }
+         .tabs-row {
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         position: sticky;
+         top: 0;
+         z-index: 1000;
+         background-color: #23243a;
+         border-radius: 0.8rem;
+         box-shadow: 0 0.2vw 1.6vw rgba(0, 0, 0, 0.25);
+         padding: 0.5vw;
+         margin-bottom: 2vw;
+         }
+         @media (max-width: 768px) {
+         .tabs-row {
+         margin-bottom: 1vw;
+         padding: 0.5vw 1vw;
+         }
+         }
+         @media (max-width: 480px) {
+         .tabs-row {
+         margin-bottom: 1vw;
+         padding: 0.5vw 0.5vw;
+         }
+         }
+         .tab-button {
+         padding: 0.8em 2em;
+         font-size: 1em;
+         font-weight: 600;
+         cursor: pointer;
+         border: none;
+         background-color: transparent;
+         color: #e0e0e0;
+         transition: all 0.3s ease;
+         border-radius: 0.6em;
+         flex-grow: 1;
+         text-align: center;
+         }
+         .tab-button:hover {
+         background-color: #23243a;
+         color: #ffb300;
+         border: 2px solid #3b7fc7;
+         z-index: 1;
+         }
+         body.light-mode .tab-button:hover {
+         background-color: #e3f0ff;
+         color: #3b7fc7;
+         border: 2px solid #3b7fc7;
+         }
+         @media (max-width: 768px) {
+         .tab-button {
+         padding: 0.7em 1em;
+         font-size: 0.95em;
+         }
+         }
+         @media (max-width: 480px) {
+         .tab-button {
+         padding: 0.6em 0.5em;
+         font-size: 0.9em;
+         }
+         }
+         .tab-button.active {
+         background-color: #3b7fc7;
+         color: #fff;
+         border: 2px solid #3b7fc7;
+         z-index: 2;
+         }
+         body.light-mode .tab-button.active {
+         background-color: #ffb300;
+         color: #23243a;
+         border: 2px solid #ffb300;
+         }
+         .risk-bucket-content {
+         border: 0.1em solid #232323;
+         border-radius: 0.8em;
+         padding: 0 2vw 2vw 2vw;
+         background-color: #23243a;
+         color: #f2f2f2;
+         box-shadow: 0 0.4vw 3.2vw rgba(0, 0, 0, 0.35);
+         margin-top: 2vw;
+         }
+         @media (max-width: 768px) {
+         .risk-bucket-content {
+         padding: 0 1vw 1vw 1vw;
+         margin-top: 1vw;
+         }
+         }
+         @media (max-width: 480px) {
+         .risk-bucket-content {
+         padding: 0 0.5vw 0.5vw 0.5vw;
+         margin-top: 1vw;
+         }
+         }
+         .risk-bucket-content h2 {
+         text-align: center;
+         font-size: 2.2rem;
+         font-weight: 700;
+         margin-top: 0.5em;
+         margin-bottom: 1.2em;
+         letter-spacing: 0.02em;
+         }
+         body.light-mode .risk-bucket-content h2 {
+         color: #23243a;
+         }
+         .chart-title {
+         font-size: 1.35rem;
+         font-weight: 600;
+         text-align: center;
+         margin-bottom: 1vw;
+         margin-top: 0.5vw;
+         letter-spacing: 0.01em;
+         }
+         /* Light mode overrides for chart containers and canvas */
+         body.light-mode .chart-container {
+         background-color: #fff;
+         color: #23243a;
+         box-shadow: 0 0.8rem 3.2rem rgba(180, 180, 180, 0.15),
+         0 0 0 0.2rem #c3cfe2, 0 0 3.2rem 0 rgba(0, 123, 255, 0.06),
+         0 0 6.4rem 0 rgba(255, 87, 34, 0.04),
+         0 0 0 0.4rem rgba(0, 0, 0, 0.01) inset;
+         border: 0.15rem solid #c3cfe2;
+         }
+         body.light-mode .chart-container canvas,
+         body.light-mode .overview-chart canvas {
+         background: #fff !important;
+         color: #23243a !important;
+         border-radius: 1.2em;
+         }
+         body.light-mode .risk-bucket-content {
+         background-color: #fff;
+         color: #23243a;
+         border: 1px solid #c3cfe2;
+         }
+         body.light-mode .risk-bucket-content h2 {
+         color: #23243a;
+         }
+         body.light-mode .dashboard-header h1 {
+         background: linear-gradient(90deg, #f5f7fa 80%, #c3cfe2 100%);
+         color: #23243a;
+         }
+         body.light-mode .tabs-row {
+         background-color: #fff;
+         }
+         body.light-mode .tab-button {
+         color: #23243a;
+         }
+         body.light-mode .tab-button.active {
+         background-color: #3b7fc7;
+         color: #fbfbfc;
+         }
+         body.light-mode .hamburger-menu span {
+         background-color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown {
+         background-color: #e0e0e0;
+         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+         }
+         body.light-mode .hamburger-dropdown a {
+         color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown a:hover {
+         background-color: #007bff;
+         color: #fff;
+         }
+         body.light-mode .header-hamburger-dropdown {
+         background: #fff !important;
+         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+         }
+         body.light-mode .header-hamburger-dropdown a {
+         color: #23243a !important;
+         }
+         body.light-mode .header-hamburger-dropdown a:hover {
+         background: #ffb300 !important;
+         color: #23243a !important;
+         }
+         body.light-mode .empty-data-message {
+         background: #fffbe6;
+         color: #b26a00;
+         border: 1px solid #ffe082;
+         }
+         /* --- Responsive Chart Grid Layout --- */
+         .chart-grid {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         gap: 3vw;
+         margin: 2vw 0;
+         max-width: 100%;
+         box-sizing: border-box;
+         }
+         .chart-tile {
+         background: var(--chart-tile-bg, #ececec);
+         border-radius: 1.2rem;
+         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+         margin-top: 5% !important;
+         margin-bottom: 0;
+         padding: 1.5vw 1vw 1vw 1vw;
+         transition: transform 0.18s cubic-bezier(0.4, 2, 0.6, 1),
+         box-shadow 0.18s;
+         position: relative;
+         cursor: pointer;
+         background-color: #23243a;
+         max-width: 45% !important;
+         box-sizing: border-box;
+         overflow-x: auto;
+         }
+         .investor-Distribution-chart-tile {
+         background: var(--chart-tile-bg, #ececec);
+         border-radius: 1.2rem;
+         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+         margin-bottom: 0;
+         padding: 1.5vw 1vw 1vw 1vw;
+         transition: transform 0.18s cubic-bezier(0.4, 2, 0.6, 1),
+         box-shadow 0.18s;
+         position: relative;
+         cursor: pointer;
+         background-color: #23243a;
+         max-width: 100%;
+         box-sizing: border-box;
+         overflow-x: auto;
+         }
+         .chart-tile:hover {
+         transform: scale(1.03) translateY(-0.5vw);
+         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+         z-index: 2;
+         border: 2.5px solid #3b7fc7;
+         }
+         body.light-mode .chart-tile {
+         background-color: #fff !important;
+         color: #23243a !important;
+         box-shadow: 0 2px 12px rgba(180, 180, 180, 0.1);
+         }
+         body.light-mode .chart-tile:hover {
+         border: 2.5px solid #3b7fc7;
+         }
+         @media (max-width: 900px) {
+         .chart-grid {
+         grid-template-columns: 1fr;
+         gap: 4vw;
+         }
+         .chart-tile {
+         padding: 2vw 1vw 1vw 1vw;
+         }
+         }
+         @media (max-width: 600px) {
+         .chart-tile {
+         /* flex: 1 1 100%; */
+         display: flex; /* Enables Flexbox */
+         justify-content: space-between; /* Adjusts spacing between elements */
+         align-items: center; /* Aligns items vertically (optional) */
+         max-width: 100%;
+         min-width: 0;
+         padding: 2vw 1vw 1vw 1vw;
+         }
+         .chart-grid {
+         gap: 4vw;
+         }
+         }
+         /* --- End Responsive Chart Grid --- */
+         /* Light mode overrides for chart containers and canvas */
+         body.light-mode .chart-container {
+         background-color: #fff;
+         color: #23243a;
+         box-shadow: 0 0.8rem 3.2rem rgba(180, 180, 180, 0.15),
+         0 0 0 0.2rem #c3cfe2, 0 0 3.2rem 0 rgba(0, 123, 255, 0.06),
+         0 0 6.4rem 0 rgba(255, 87, 34, 0.04),
+         0 0 0 0.4rem rgba(0, 0, 0, 0.01) inset;
+         border: 0.15rem solid #c3cfe2;
+         }
+         body.light-mode .chart-container canvas,
+         body.light-mode .overview-chart canvas {
+         background: #fff !important;
+         color: #23243a !important;
+         border-radius: 1.2em;
+         }
+         body.light-mode .risk-bucket-content {
+         background-color: #fff;
+         color: #23243a;
+         border: 1px solid #c3cfe2;
+         }
+         body.light-mode .risk-bucket-content h2 {
+         color: #23243a;
+         }
+         body.light-mode .dashboard-header h1 {
+         background: linear-gradient(90deg, #f5f7fa 80%, #c3cfe2 100%);
+         color: #23243a;
+         }
+         body.light-mode .tabs-row {
+         background-color: #fff;
+         }
+         body.light-mode .tab-button {
+         color: #23243a;
+         }
+         body.light-mode .tab-button.active {
+         background-color: #3b7fc7;
+         color: #fbfbfc;
+         }
+         body.light-mode .hamburger-menu span {
+         background-color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown {
+         background-color: #e0e0e0;
+         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+         }
+         body.light-mode .hamburger-dropdown a {
+         color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown a:hover {
+         background-color: #007bff;
+         color: #fff;
+         }
+         body.light-mode .header-hamburger-dropdown {
+         background: #fff !important;
+         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+         }
+         body.light-mode .header-hamburger-dropdown a {
+         color: #23243a !important;
+         }
+         body.light-mode .header-hamburger-dropdown a:hover {
+         background: #ffb300 !important;
+         color: #23243a !important;
+         }
+         body.light-mode .empty-data-message {
+         background: #fffbe6;
+         color: #b26a00;
+         border: 1px solid #ffe082;
+         }
+         /* --- Responsive Chart Grid Layout --- */
+         .chart-grid {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         gap: 3vw;
+         margin: 2vw 0;
+         max-width: 100%;
+         box-sizing: border-box;
+         }
+         .chart-tile {
+         background: var(--chart-tile-bg, #fff);
+         border-radius: 1.2rem;
+         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+         margin-bottom: 0;
+         padding: 1.5vw 1vw 1vw 1vw;
+         transition: transform 0.18s cubic-bezier(0.4, 2, 0.6, 1),
+         box-shadow 0.18s;
+         position: relative;
+         cursor: pointer;
+         background-color: #23243a;
+         max-width: 100%;
+         box-sizing: border-box;
+         overflow-x: auto;
+         }
+         .chart-tile:hover {
+         transform: scale(1.03) translateY(-0.5vw);
+         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+         z-index: 2;
+         border: 2.5px solid #3b7fc7;
+         }
+         body.light-mode .chart-tile {
+         background-color: #fff !important;
+         color: #23243a !important;
+         box-shadow: 0 2px 12px rgba(180, 180, 180, 0.1);
+         }
+         body.light-mode .chart-tile:hover {
+         border: 2.5px solid #3b7fc7;
+         }
+         @media (max-width: 900px) {
+         .chart-grid {
+         grid-template-columns: 1fr;
+         gap: 4vw;
+         }
+         .chart-tile {
+         padding: 2vw 1vw 1vw 1vw;
+         }
+         }
+         @media (max-width: 600px) {
+         .chart-tile {
+         flex: 1 1 100%;
+         max-width: 100%;
+         min-width: 0;
+         padding: 2vw 1vw 1vw 1vw;
+         }
+         .chart-grid {
+         gap: 4vw;
+         }
+         }
+         /* --- End Responsive Chart Grid --- */
+         /* Light mode overrides for chart containers and canvas */
+         body.light-mode .chart-container {
+         background-color: #fff;
+         color: #23243a;
+         box-shadow: 0 0.8rem 3.2rem rgba(180, 180, 180, 0.15),
+         0 0 0 0.2rem #c3cfe2, 0 0 3.2rem 0 rgba(0, 123, 255, 0.06),
+         0 0 6.4rem 0 rgba(255, 87, 34, 0.04),
+         0 0 0 0.4rem rgba(0, 0, 0, 0.01) inset;
+         border: 0.15rem solid #c3cfe2;
+         }
+         body.light-mode .chart-container canvas,
+         body.light-mode .overview-chart canvas {
+         background: #fff !important;
+         color: #23243a !important;
+         border-radius: 1.2em;
+         }
+         body.light-mode .risk-bucket-content {
+         background-color: #fff;
+         color: #23243a;
+         border: 1px solid #c3cfe2;
+         }
+         body.light-mode .risk-bucket-content h2 {
+         color: #23243a;
+         }
+         body.light-mode .dashboard-header h1 {
+         background: linear-gradient(90deg, #f5f7fa 80%, #c3cfe2 100%);
+         color: #23243a;
+         }
+         body.light-mode .tabs-row {
+         background-color: #fff;
+         }
+         body.light-mode .tab-button {
+         color: #23243a;
+         }
+         body.light-mode .tab-button.active {
+         background-color: #3b7fc7;
+         color: #fbfbfc;
+         }
+         body.light-mode .hamburger-menu span {
+         background-color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown {
+         background-color: #e0e0e0;
+         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+         }
+         body.light-mode .hamburger-dropdown a {
+         color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown a:hover {
+         background-color: #007bff;
+         color: #fff;
+         }
+         body.light-mode .header-hamburger-dropdown {
+         background: #fff !important;
+         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+         }
+         body.light-mode .header-hamburger-dropdown a {
+         color: #23243a !important;
+         }
+         body.light-mode .header-hamburger-dropdown a:hover {
+         background: #ffb300 !important;
+         color: #23243a !important;
+         }
+         body.light-mode .empty-data-message {
+         background: #fffbe6;
+         color: #b26a00;
+         border: 1px solid #ffe082;
+         }
+         /* --- Responsive Chart Grid Layout --- */
+         .chart-grid {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         gap: 3vw;
+         margin: 2vw 0;
+         max-width: 100%;
+         box-sizing: border-box;
+         }
+         .chart-tile {
+         background: var(--chart-tile-bg, #fff);
+         border-radius: 1.2rem;
+         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+         margin-bottom: 0;
+         padding: 1.5vw 1vw 1vw 1vw;
+         transition: transform 0.18s cubic-bezier(0.4, 2, 0.6, 1),
+         box-shadow 0.18s;
+         position: relative;
+         cursor: pointer;
+         background-color: #23243a;
+         max-width: 100%;
+         box-sizing: border-box;
+         overflow-x: auto;
+         }
+         .chart-tile:hover {
+         transform: scale(1.03) translateY(-0.5vw);
+         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+         z-index: 2;
+         border: 2.5px solid #3b7fc7;
+         }
+         body.light-mode .chart-tile {
+         background-color: #fff !important;
+         color: #23243a !important;
+         box-shadow: 0 2px 12px rgba(180, 180, 180, 0.1);
+         }
+         body.light-mode .chart-tile:hover {
+         border: 2.5px solid #3b7fc7;
+         }
+         @media (max-width: 900px) {
+         .chart-grid {
+         grid-template-columns: 1fr;
+         gap: 4vw;
+         }
+         .chart-tile {
+         padding: 2vw 1vw 1vw 1vw;
+         }
+         }
+         @media (max-width: 600px) {
+         .chart-tile {
+         flex: 1 1 100%;
+         max-width: 100%;
+         min-width: 0;
+         padding: 2vw 1vw 1vw 1vw;
+         }
+         .chart-grid {
+         gap: 4vw;
+         }
+        }
+        /* #chart-container{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        align-content: space-between;
+        flex-direction: row;
+        /* row-gap: 1%; */
+        #chart-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-content: space-between;
+    flex-direction: row;
+    /* row-gap: 1%; */
+}
+
+#Sec-Dist-Pie-Chart-header {
+  position: fixed; /* Changed from relative to fixed */
+  top: 0;
+  left: 0;
+  width: 100%; /* Full viewport width */
+  margin: 0;
+  padding: 10px;
+  text-align: center;
+  background-color: #f8f8f8;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: adds depth */
+  z-index: 1000; /* Ensures header stays above other elements */
+}
+
+#highRiskPieChart {
+  width: 100%;
+  height: auto;
+}
+
+/* Media query for mobile/small screens */
+/* @media screen and (max-width: 768px) {
+    #chart-container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        max-width: 100% !important;
+    }
+} */
+
+@media screen and (max-width: 768px) {
+    #chart-container {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+    }
+    #chart-container > * {
+        width: 100%;
+    }
+    .chart-tile{
+        max-width: 100% !important;
+    }
+   
+    #chart-container h3{
+        text-align: center;
+        transform: none; /* Reset any rotation */
+        margin: 0.5em 0; /* Consistent margin */
+        width: 100%; /* Full width */
+        order: -1; /* Ensure heading appears at the top */
+    }
+}
+
+        
+         /* --- End Responsive Chart Grid --- */
+         /* Light mode overrides for chart containers and canvas */
+         body.light-mode .chart-container {
+         background-color: #fff;
+         color: #23243a;
+         box-shadow: 0 0.8rem 3.2rem rgba(180, 180, 180, 0.15),
+         0 0 0 0.2rem #c3cfe2, 0 0 3.2rem 0 rgba(0, 123, 255, 0.06),
+         0 0 6.4rem 0 rgba(255, 87, 34, 0.04),
+         0 0 0 0.4rem rgba(0, 0, 0, 0.01) inset;
+         border: 0.15rem solid #c3cfe2;
+         }
+         body.light-mode .chart-container canvas,
+         body.light-mode .overview-chart canvas {
+         background: #fff !important;
+         color: #23243a !important;
+         border-radius: 1.2em;
+         }
+         body.light-mode .risk-bucket-content {
+         background-color: #fff;
+         color: #23243a;
+         border: 1px solid #c3cfe2;
+         }
+         body.light-mode .risk-bucket-content h2 {
+         color: #23243a;
+         }
+         body.light-mode .dashboard-header h1 {
+         background: linear-gradient(90deg, #f5f7fa 80%, #c3cfe2 100%);
+         color: #23243a;
+         }
+         body.light-mode .tabs-row {
+         background-color: #fff;
+         }
+         body.light-mode .tab-button {
+         color: #23243a;
+         }
+         body.light-mode .tab-button.active {
+         background-color: #3b7fc7;
+         color: #fbfbfc;
+         }
+         body.light-mode .hamburger-menu span {
+         background-color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown {
+         background-color: #e0e0e0;
+         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+         }
+         body.light-mode .hamburger-dropdown a {
+         color: #23243a;
+         }
+         body.light-mode .hamburger-dropdown a:hover {
+         background-color: #007bff;
+         color: #fff;
+         }
+         body.light-mode .header-hamburger-dropdown {
+         background: #fff !important;
+         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+         }
+         body.light-mode .header-hamburger-dropdown a {
+         color: #23243a !important;
+         }
+         body.light-mode .header-hamburger-dropdown a:hover {
+         background: #ffb300 !important;
+         color: #23243a !important;
+         }
+         body.light-mode .empty-data-message {
+         background: #fffbe6;
+         color: #b26a00;
+         border: 1px solid #ffe082;
+         }
+         /* --- Theme Toggle Slider (Larger & Responsive) --- */
+         .theme-toggle-row {
+         display: flex;
+         justify-content: flex-end;
+         align-items: center;
+         margin: 1vw 2vw 1vw 0;
+         }
+         .theme-toggle {
+         display: flex;
+         align-items: center;
+         gap: 0.7em;
+         }
+         .theme-toggle .toggle-icon {
+         font-size: 1.2em;
+         user-select: none;
+         pointer-events: none;
+         line-height: 1;
+         }
+         .theme-switch {
+         position: relative;
+         display: inline-block;
+         width: 44px;
+         height: 24px;
+         }
+         .theme-switch input {
+         opacity: 0;
+         width: 0;
+         height: 0;
+         }
+         .theme-slider {
+         position: absolute;
+         cursor: pointer;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         background: #bfc9d1;
+         border-radius: 34px;
+         transition: background 0.3s;
+         }
+         .theme-slider:before {
+         position: absolute;
+         content: "";
+         height: 16px;
+         width: 16px;
+         left: 4px;
+         bottom: 4px;
+         background: #fff;
+         border-radius: 50%;
+         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+         transition: transform 0.3s, background 0.3s;
+         }
+         .theme-switch input:checked + .theme-slider {
+         background: #3b7fc7;
+         }
+         .theme-switch input:checked + .theme-slider:before {
+         transform: translateX(20px);
+         background: #23243a;
+         }
+         @media (max-width: 600px) {
+         .theme-toggle .toggle-icon {
+         font-size: 1em;
+         }
+         .theme-switch {
+         width: 32px;
+         height: 16px;
+         }
+         .theme-slider:before {
+         height: 10px;
+         width: 10px;
+         left: 3px;
+         bottom: 3px;
+         }
+         .theme-switch input:checked + .theme-slider:before {
+         transform: translateX(10px);
+         }
+         }
+         /* General transitions for smoothness */
+         * {
+         transition: all 0.3s ease;
+         }
+         /* --- Chart Grid Layout for Dashboard --- */
+         /* Use this in your template for each tab's charts */
+         /* Example for overview tab: */
+         /* 
+         <div class="chart-grid">
+            */
+            /* 
+            <div class="chart-tile">
+               <div class="chart-title">Bar Chart</div>
+               <canvas id="investorDistributionBarChart"></canvas>
+            </div>
+            */
+            /* 
+            <div class="chart-tile">
+               <div class="chart-title">Pie Chart</div>
+               <canvas id="investorDistributionPieChart"></canvas>
+            </div>
+            */
+            /* ... */
+            /* 
+         </div>
+         */
+         /* For each tab, wrap every two charts in a .chart-grid, each chart in .chart-tile */
+         .header-hamburger-dropdown a {
+         display: block;
+         padding: 12px 20px;
+         color: #fff;
+         text-decoration: none;
+         font-size: 1em;
+         border-radius: 0.4em;
+         transition: background 0.2s, color 0.2s;
+         }
+         .header-hamburger-dropdown a:hover {
+         background: #3b7fc7;
+         color: #fff;
+         }
+         .header-hamburger-dropdown {
+         background: #23243a;
+         border-radius: 0.8em;
+         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+         min-width: 180px;
+         z-index: 2000;
+         }
+         body.light-mode .header-hamburger-dropdown {
+         background: #fff;
+         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+         }
+         body.light-mode .header-hamburger-dropdown a {
+         color: #23243a;
+         }
+         body.light-mode .header-hamburger-dropdown a:hover {
+         background: #ffb300;
+         color: #23243a;
+         }
+         body.light-mode .dashboard-header .logo {
+         filter: none !important;
+         box-shadow: none !important;
+         }
+         /* --- Footer Styles --- */
+         .dashboard-footer {
+         width: 100vw;
+         background: linear-gradient(90deg, #23243a 80%, #2a2e3d 100%);
+         color: #fff;
+         padding: 2.5vw 0 2vw 0;
+         margin-top: 3vw;
+         box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.12);
+         font-size: 0.95em;
+         }
+         .footer-content {
+         max-width: 1200px;
+         margin: 0 auto;
+         display: flex;
+         flex-wrap: wrap;
+         gap: 2vw;
+         justify-content: space-between;
+         align-items: flex-start;
+         padding: 0 2vw;
+         }
+         .footer-logo-section {
+         flex: 1 1 260px;
+         min-width: 220px;
+         display: flex;
+         flex-direction: column;
+         align-items: flex-start;
+         gap: 1vw;
+         }
+         .footer-logo {
+         width: 180px;
+         height: auto;
+         margin-bottom: 0.7vw;
+         filter: drop-shadow(0 0 1.2vw #0008);
+         }
+         .footer-company-desc {
+         font-size: 0.95em;
+         font-weight: 500;
+         color: #ffb300;
+         margin-bottom: 0.5vw;
+         }
+         .footer-info-section {
+         flex: 3 1 400px;
+         display: flex;
+         flex-direction: column;
+         gap: 1.2vw;
+         }
+         .footer-info-block {
+         margin-bottom: 0.5vw;
+         }
+         .footer-info-title {
+         font-weight: 700;
+         color: #ffb300;
+         margin-bottom: 0.2vw;
+         font-size: 0.95em;
+         }
+         .footer-info-text {
+         color: #fff;
+         font-size: 0.95em;
+         line-height: 1.5em;
+         }
+         .footer-contact-block {
+         display: flex;
+         gap: 2vw;
+         margin-top: 1vw;
+         flex-wrap: wrap;
+         }
+         .footer-contact-item {
+         display: flex;
+         align-items: center;
+         gap: 0.5em;
+         font-size: 0.95em;
+         color: #fff;
+         background: rgba(255, 255, 255, 0.04);
+         border-radius: 0.6em;
+         padding: 0.4em 1em;
+         }
+         .footer-icon {
+         width: 1.3em;
+         height: 1.3em;
+         margin-right: 0.3em;
+         vertical-align: middle;
+         filter: brightness(1.2) drop-shadow(0 0 2px #ffb30088);
+         }
+         @media (max-width: 900px) {
+         .footer-content {
+         flex-direction: column;
+         gap: 2vw;
+         align-items: flex-start;
+         }
+         .footer-logo-section,
+         .footer-info-section {
+         width: 100%;
+         min-width: 0;
+         }
+         .footer-contact-block {
+         gap: 1vw;
+         }
+         }
+         @media (max-width: 600px) {
+         .dashboard-footer {
+         font-size: 0.9em;
+         padding: 4vw 0 3vw 0;
+         }
+         .footer-content {
+         padding: 0 1vw;
+         }
+         .footer-logo {
+         width: 120px;
+         }
+         .footer-company-desc {
+         font-size: 1em;
+         }
+         .footer-contact-block {
+         flex-direction: column;
+         gap: 0.7vw;
+         }
+         }
+         body.light-mode .dashboard-footer {
+         background: linear-gradient(90deg, #f5f7fa 80%, #c3cfe2 100%);
+         color: #23243a;
+         box-shadow: 0 -2px 16px rgba(180, 180, 180, 0.1);
+         }
+         body.light-mode .footer-company-desc,
+         body.light-mode .footer-info-title {
+         color: #ffb300;
+         }
+         body.light-mode .footer-info-text,
+         body.light-mode .footer-contact-item {
+         color: #23243a;
+         background: rgba(0, 0, 0, 0.03);
+         }
+         body.light-mode .footer-icon {
+         filter: brightness(0.7) drop-shadow(0 0 2px #ffb30088);
+         }
+         .risk-bucket-content .chart-grid {
+         display: flex;
+         flex-direction: column;
+         gap: 2vw;
+         width: 100%;
+         max-width: 100vw;
+         margin: 0 auto;
+         padding: 0;
+         }
+         .risk-bucket-content .chart-tile {
+         width: 100%;
+         max-width: 100vw;
+         margin: 0 auto 2vw auto;
+         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07),
+         0 1.5px 6px rgba(255, 179, 0, 0.08);
+         border-radius: 1.2em;
+         background: var(--chart-tile-bg, #fff);
+         padding: 2vw 2vw 2vw 2vw;
+         }
+         .top-customers-section {
+         display: flex;
+         flex-direction: column;
+         gap: 2vw;
+         width: 100%;
+         max-width: 100vw;
+         margin: 0 auto;
+         padding: 0;
+         }
+         .top-customers-table {
+         width: 90%;
+         max-width: 700px;
+         border-collapse: separate;
+         border-spacing: 0;
+         font-family: "Fira Mono", Menlo, Monaco, Consolas, monospace;
+         font-size: 0.98em;
+         background: linear-gradient(90deg, #e3f2fd 60%, #bbdefb 100%);
+         margin-top: 0.5em;
+         margin-bottom: 1.5em;
+         border-radius: 1.3em;
+         overflow: hidden;
+         box-shadow: 0 6px 32px rgba(33, 150, 243, 0.13),
+         0 2px 8px rgba(0, 0, 0, 0.08);
+         transition: box-shadow 0.2s;
+         min-width: 260px;
+         }
+         .top-customers-table th,
+         .top-customers-table td {
+         padding: 10px 14px;
+         text-align: left;
+         border: none;
+         font-size: 0.97em;
+         }
+         /* .top-customers-table th {
+         background: linear-gradient(90deg, #64b5f6 60%, #bbdefb 100%);
+         color: #23243a;
+         font-weight: 900;
+         font-size: 1em;
+         letter-spacing: 0.8px;
+         border-bottom: 3px solid #90caf9;
+         text-shadow: 0 1px 0 #fff8;
+         text-align: center;
+         } */
+         .top-customers-table th {
+         background-color: #bdd1f2;
+         color: #23243a;
+         font-weight: 900;
+         font-size: 1em;
+         letter-spacing: 0.8px;
+         border-bottom: 3px solid #90caf9;
+         text-shadow: 0 1px 0 #fff8;
+         text-align: center;
+         }
+         .top-customers-table tr:nth-child(even) td {
+         background: rgba(100, 181, 246, 0.1);
+         }
+         .top-customers-table tr:nth-child(odd) td {
+         background: rgba(187, 222, 251, 0.1);
+         }
+         .top-customers-table tr:hover td {
+         background: #e3f2fd;
+         color: #1976d2;
+         transition: background 0.18s, color 0.18s;
+         font-weight: 700;
+         box-shadow: 0 2px 12px #64b5f633;
+         }
+         .top-customers-table td {
+         color: #23243a;
+         font-weight: 600;
+         font-size: 0.97em;
+         border-bottom: 1.5px solid #bbdefb;
+         text-align: center;
+         }
+         .top-customers-table tr:last-child td {
+         border-bottom: none;
+         }
+         /* .top-customers-table th.serial-col,
+         .top-customers-table td.serial-col {
+         text-align: center;
+         width: 2.2em;
+         font-weight: bold;
+         color: #1976d2;
+         background: rgba(100, 181, 246, 0.13);
+         font-size: 1em;
+         } */
+         .top-customers-table th.serial-col,
+         .top-customers-table td.serial-col {
+         text-align: center;
+         width: 2.2em;
+         font-weight: bold;
+         /* color: #1976d2; */
+         /* background: rgba(100, 181, 246, 0.13); */
+         background-color: #bdd1f2;
+         font-size: 1em;
+         }
+         @media (max-width: 900px) {
+         .top-customers-table th,
+         .top-customers-table td {
+         padding: 7px 4px;
+         font-size: 0.93em;
+         }
+         .top-customers-table {
+         width: 98%;
+         max-width: 99vw;
+         }
+         }
+         @media (max-width: 600px) {
+         .top-customers-table th,
+         .top-customers-table td {
+         padding: 5px 2px;
+         font-size: 0.89em;
+         }
+         .top-customers-table {
+         width: 100%;
+         min-width: 180px;
+         }
+         }
+         body.dark-mode .top-customers-table {
+         background: linear-gradient(90deg, #23243a 60%, #2a2e3d 100%);
+         box-shadow: 0 6px 32px #23243a33, 0 2px 8px #1976d222;
+         }
+         body.dark-mode .top-customers-table th {
+         background: linear-gradient(90deg, #1976d2 60%, #23243a 100%);
+         color: #fff;
+         border-bottom: 3px solid #1976d2;
+         text-shadow: 0 1px 0 #23243a88;
+         }
+         body.dark-mode .top-customers-table tr:nth-child(even) td {
+         background: rgba(100, 181, 246, 0.13);
+         }
+         body.dark-mode .top-customers-table tr:nth-child(odd) td {
+         background: rgba(35, 36, 58, 0.85);
+         }
+         body.dark-mode .top-customers-table tr:hover td {
+         background: #3b3e5a;
+         color: #1976d2;
+         font-weight: 700;
+         }
+         body.dark-mode .top-customers-table td {
+         color: #fff;
+         border-bottom: 1.5px solid #1976d244;
+         }
+         body.dark-mode .top-customers-table th.serial-col,
+         body.dark-mode .top-customers-table td.serial-col {
+         color: #1976d2;
+         background: rgba(100, 181, 246, 0.18);
+         }
+      </style>
+   </head>
+   <body :class="theme + '-mode'">
+      <div id="app">
+         <header class="dashboard-header" v-show="showHeaderFooter">
+            <img
+               src="headerlogo.png"
+               alt="Sharekhan Logo"
+               class="logo"
+               style="margin: 0 auto; display: block"
+               />
+            <h1>Stock Market Portfolio Dashboard</h1>
+            <div
+               class="header-hamburger"
+               @click.stop="headerHamburgerOpen = !headerHamburgerOpen"
+               style="position: relative; cursor: pointer"
+               >
+               <!-- Hamburger Icon -->
+               <span
+                  style="
+                  display: block;
+                  width: 32px;
+                  height: 4px;
+                  background: #ffb300;
+                  margin: 6px 0;
+                  border-radius: 2px;
+                  "
+                  ></span>
+               <span
+                  style="
+                  display: block;
+                  width: 32px;
+                  height: 4px;
+                  background: #ffb300;
+                  margin: 6px 0;
+                  border-radius: 2px;
+                  "
+                  ></span>
+               <span
+                  style="
+                  display: block;
+                  width: 32px;
+                  height: 4px;
+                  background: #ffb300;
+                  margin: 6px 0;
+                  border-radius: 2px;
+                  "
+                  ></span>
+               <div
+                  v-if="headerHamburgerOpen"
+                  class="header-hamburger-dropdown"
+                  @mouseleave="headerHamburgerOpen = false"
+                  style="
+                  position: absolute;
+                  right: 0;
+                  top: 40px;
+                  min-width: 180px;
+                  background: #23243a;
+                  border-radius: 0.8em;
+                  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+                  z-index: 2000;
+                  "
+                  >
+                  <a
+                     href="#"
+                     @click.prevent="switchTab('overview'); headerHamburgerOpen = false"
+                     style="
+                     display: block;
+                     padding: 12px 20px;
+                     color: #fff;
+                     text-decoration: none;
+                     "
+                     >Investor Overview</a
+                     >
+                  <a
+                     href="#"
+                     @click.prevent="switchTab('highRisk'); headerHamburgerOpen = false"
+                     style="
+                     display: block;
+                     padding: 12px 20px;
+                     color: #fff;
+                     text-decoration: none;
+                     "
+                     >High Risk Clients</a
+                     >
+                  <a
+                     href="#"
+                     @click.prevent="switchTab('midRisk'); headerHamburgerOpen = false"
+                     style="
+                     display: block;
+                     padding: 12px 20px;
+                     color: #fff;
+                     text-decoration: none;
+                     "
+                     >Mid Risk Clients</a
+                     >
+                  <a
+                     href="#"
+                     @click.prevent="switchTab('lowRisk'); headerHamburgerOpen = false"
+                     style="
+                     display: block;
+                     padding: 12px 20px;
+                     color: #fff;
+                     text-decoration: none;
+                     "
+                     >Low Risk Clients</a
+                     >
+                  <div style="height: 1px; background: #444; margin: 6px 0"></div>
+                  <a
+                     href="#"
+                     class="change-branch"
+                     @click.prevent="changeBranch(); headerHamburgerOpen = false"
+                     style="
+                     display: block;
+                     padding: 12px 20px;
+                     color: #ffb300;
+                     text-decoration: none;
+                     "
+                     >Change Branch</a
+                     >
+               </div>
+            </div>
+         </header>
+         <div class="tabs-row">
+            <div class="tabs">
+               <button
+                  class="tab-button"
+                  :class="{ active: activeTab === 'overview' }"
+                  @click="activeTab = 'overview'"
+                  >
+               Investor Overview
+               </button>
+               <button
+                  class="tab-button"
+                  :class="{ active: activeTab === 'highRisk' }"
+                  @click="activeTab = 'highRisk'"
+                  >
+               High Risk Clients
+               </button>
+               <button
+                  class="tab-button"
+                  :class="{ active: activeTab === 'midRisk' }"
+                  @click="activeTab = 'midRisk'"
+                  >
+               Mid Risk Clients
+               </button>
+               <button
+                  class="tab-button"
+                  :class="{ active: activeTab === 'lowRisk' }"
+                  @click="activeTab = 'lowRisk'"
+                  >
+               Low Risk Clients
+               </button>
+            </div>
+            <!-- Move hamburger menu here, before the search bar -->
+            <div class="hamburger-menu" @click="hamburgerOpen = !hamburgerOpen">
+               <span :class="{ 'open': hamburgerOpen }"></span>
+               <span :class="{ 'open': hamburgerOpen }"></span>
+               <span :class="{ 'open': hamburgerOpen }"></span>
+            </div>
+            <div class="hamburger-dropdown" v-if="hamburgerOpen">
+               <div class="dropdown-item" @click="switchTab('overview')">
+                  Investor Overview
+               </div>
+               <div class="dropdown-item" @click="switchTab('highRisk')">
+                  High Risk
+               </div>
+               <div class="dropdown-item" @click="switchTab('midRisk')">
+                  Mid Risk
+               </div>
+               <div class="dropdown-item" @click="switchTab('lowRisk')">
+                  Low Risk
+               </div>
+               <div class="dropdown-divider"></div>
+               <div class="dropdown-item change-branch" @click="changeBranch">
+                  Change Branch
+               </div>
+            </div>
+         </div>
+         <!-- Branch search bar under header, above tabs -->
+         <div class="branch-search-bar">
+            <div class="bar-section left">
+               <button @click="manualRefresh" :title="'Refresh Now'">
+               <span
+                  class="refresh-icon"
+                  :style="{animation: isRefreshing ? 'spin 1s linear infinite' : 'none'}"
+                  >&#x21bb;</span
+                  >
+               </button>
+               <select id="refresh-interval" @change="changeRefreshInterval">
+                  <option value="0">Off</option>
+                  <option value="10">10s</option>
+                  <option value="30">30s</option>
+                  <option value="60">1 min</option>
+                  <option value="300">5 min</option>
+               </select>
+            </div>
+            <div class="bar-section center">
+               <input
+                  v-model="branchNumber"
+                  type="text"
+                  placeholder="Enter Branch Number"
+                  :disabled="branchLoading"
+                  />
+               <button
+                  @click="searchBranch"
+                  :disabled="branchLoading || !branchNumber"
+                  >
+               Search
+               </button>
+               <span v-if="branchLoading" style="color: #ffb300; font-size: 1.1em"
+                  >Loading...</span
+                  >
+               <span v-if="branchError" style="color: #e63946; font-size: 1.1em"
+                  >{{ branchError }}</span
+                  >
+            </div>
+            <div class="bar-section right theme-toggle-row">
+               <div class="theme-toggle">
+                  <span class="toggle-icon">☀️</span>
+                  <label class="theme-switch">
+                  <input
+                     id="themeSwitch"
+                     type="checkbox"
+                     v-model="themeIsDark"
+                     @onclick="toggleTheme"
+                     />
+                  <span class="theme-slider"></span>
+                  </label>
+                  <span class="toggle-icon">🌙</span>
+               </div>
+            </div>
+         </div>
+         <!-- <div class="theme-toggle-row">
+            <div class="theme-toggle">
+            <span class="toggle-icon">☀️</span>
+            <label class="theme-switch">
+            <input id="themeSwitch" type="checkbox" v-model="themeIsDark" @change="toggleTheme">
+            <span class="theme-slider"></span>
+            </label>
+            <span class="toggle-icon">🌙</span>
+            </div>
+            </div> -->
+         <div class="risk-bucket-content" v-if="activeTab === 'overview'">
+            <h2>Investor Distribution by Risk Profile</h2>
+            <div class="chart-grid">
+               <div
+                  class="investor-Distribution-chart-tile"
+                  :style="{ background: themeIsDark ? '#23243a' : '#fff', borderRadius: '1.2rem', boxShadow: themeIsDark ? '0 2px 12px rgba(0,0,0,0.25)' : '0 2px 12px rgba(0,0,0,0.08)' }"
+                  >
+                  <div class="chart-title">Investor Distribution (Bar Chart)</div>
+                  <canvas id="investorDistributionBarChart"></canvas>
+               </div>
+            </div>
+            <!-- Fund Summary Boxes -->
+            <div
+               id="fund-summary-boxes"
+               style="
+                   display: flex;
+    gap: 2rem;
+    justify-content: flex-start;
+    margin: 2rem 0px;
+    align-content: center;
+    flex-wrap: wrap;
+               "
+               >
+               <div
+                  v-for="box in fundSummaryBoxes"
+                  :key="box.label"
+                  style="
+                  flex: 1;
+                  min-width: 25%;
+                  background: #fff;
+                  border-radius: 1.2rem;
+                  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+                  padding: 1.5rem;
+                  text-align: center;
+                  transition: background 0.3s;
+                  "
+                  :style="themeIsDark ? 'background:#23243a;color:#fff;' : ''"
+                  >
+                  <div
+                     style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.7rem"
+                     >
+                     {{ box.label }}
+                  </div>
+                  <div
+                     style="font-size: 2.1rem; font-weight: bold; letter-spacing: 1px"
+                     >
+                     ₹ {{ box.value }} Cr
+                  </div>
+               </div>
+            </div>
+            <div class="top-customers-section">
+               <div
+                  class="top-customers-tiles-row"
+                  style="
+                  display: flex;
+                  flex-wrap: wrap;
+                  gap: 2vw;
+                  justify-content: flex-start;
+                  "
+                  >
+                  <div
+                     class="top-customers-tile"
+                     :style="{flex: '1 1 340px', minWidth: '280px', maxWidth: '48%', background: themeIsDark ? '#23243a' : '#fff', borderRadius: '1.2rem', boxShadow: themeIsDark ? '0 2px 12px rgba(0,0,0,0.25)' : '0 2px 12px rgba(0,0,0,0.08)', marginBottom: '2vw', padding: '1.2em', marginRight: '2vw'}"
+                     >
+                     <h3>Top Customers by Stock Value</h3>
+                     <div
+                        class="top-customers-table-scroll"
+                        style="overflow-x: auto; max-height: 340px"
+                        >
+                        <table class="top-customers-table">
+                           <thead>
+                              <tr>
+                                 <th class="serial-col">#</th>
+                                 <th>Customer ID</th>
+                                 <th>Customer Name</th>
+                                 <th>Stock Value (₹)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr
+                                 v-for="(cust, idx) in topCustomersStockValue"
+                                 :key="cust.custId"
+                                 >
+                                 <td class="serial-col">{{ idx + 1 }}</td>
+                                 <td>{{ cust.custId }}</td>
+                                 <td>{{ cust.custName }}</td>
+                                 <td>{{ cust.value.toLocaleString('en-IN') }}</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+                  <div
+                     class="top-customers-tile"
+                     :style="{flex: '1 1 340px', minWidth: '280px', maxWidth: '48%', background: themeIsDark ? '#23243a' : '#fff', borderRadius: '1.2rem', boxShadow: themeIsDark ? '0 2px 12px rgba(0,0,0,0.25)' : '0 2px 12px rgba(0,0,0,0.08)', marginBottom: '2vw', padding: '1.2em'}"
+                     >
+                     <h3>Top Customers by Derivative Exposure</h3>
+                     <div
+                        class="top-customers-table-scroll"
+                        style="overflow-x: auto; max-height: 340px"
+                        >
+                        <table class="top-customers-table">
+                           <thead>
+                              <tr>
+                                 <th class="serial-col">#</th>
+                                 <th>Customer ID</th>
+                                 <th>Customer Name</th>
+                                 <th>Derivative Exposure (₹)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr
+                                 v-for="(cust, idx) in topCustomersDerivativeExposure"
+                                 :key="cust.custId"
+                                 >
+                                 <td class="serial-col">{{ idx + 1 }}</td>
+                                 <td>{{ cust.custId }}</td>
+                                 <td>{{ cust.custName }}</td>
+                                 <td>{{ cust.value.toLocaleString('en-IN') }}</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+                  <div
+                     class="top-customers-tile"
+                     :style="{flex: '1 1 340px', minWidth: '280px', maxWidth: '48%', background: themeIsDark ? '#23243a' : '#fff', borderRadius: '1.2rem', boxShadow: themeIsDark ? '0 2px 12px rgba(0,0,0,0.25)' : '0 2px 12px rgba(0,0,0,0.08)', marginBottom: '2vw', padding: '1.2em', marginRight: '2vw'}"
+                     >
+                     <h3>Top Customers by Margin Shortfall</h3>
+                     <div
+                        class="top-customers-table-scroll"
+                        style="overflow-x: auto; max-height: 340px"
+                        >
+                        <table class="top-customers-table">
+                           <thead>
+                              <tr>
+                                 <th class="serial-col">#</th>
+                                 <th>Customer ID</th>
+                                 <th>Customer Name</th>
+                                 <th>Margin Shortfall (₹)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr
+                                 v-for="(cust, idx) in topCustomersMarginShortfall"
+                                 :key="cust.custId"
+                                 >
+                                 <td class="serial-col">{{ idx + 1 }}</td>
+                                 <td>{{ cust.custId }}</td>
+                                 <td>{{ cust.custName }}</td>
+                                 <td>{{ cust.value.toLocaleString('en-IN') }}</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+                  <div
+                     class="top-customers-tile"
+                     :style="{flex: '1 1 340px', minWidth: '280px', maxWidth: '48%', background: themeIsDark ? '#23243a' : '#fff', borderRadius: '1.2rem', boxShadow: themeIsDark ? '0 2px 12px rgba(0,0,0,0.25)' : '0 2px 12px rgba(0,0,0,0.08)', marginBottom: '2vw', padding: '1.2em'}"
+                     >
+                     <h3>Top Customers by Voilation</h3>
+                     <div
+                        class="top-customers-table-scroll"
+                        style="overflow-x: auto; max-height: 340px"
+                        >
+                        <table class="top-customers-table">
+                           <thead>
+                              <tr>
+                                 <th class="serial-col">#</th>
+                                 <th>Customer ID</th>
+                                 <th>Customer Name</th>
+                                 <th>Voilation (₹)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr
+                                 v-for="(cust, idx) in topCustomersVoilation"
+                                 :key="cust.custId"
+                                 >
+                                 <td class="serial-col">{{ idx + 1 }}</td>
+                                 <td>{{ cust.custId }}</td>
+                                 <td>{{ cust.custName }}</td>
+                                 <td>{{ cust.value.toLocaleString('en-IN') }}</td>
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="risk-bucket-content" v-if="activeTab === 'highRisk'">
+            <h2>High Risk Portfolio: Aggressive Growth Focus</h2>
+            <div class="chart-grid">
+               <div class="investor-Distribution-chart-tile">
+                  <h3 class="chart-title">Asset Allocation (Bar Chart)</h3>
+                  <canvas id="highRiskBarChart"></canvas>
+               </div>
+               <div id="chart-container" class="chart-container">
+               <div class="chart-tile">
+                    <!-- <div id="Sec-Dist-Pie-Chart-header"> -->
+                        <h3 class="chart-title">Sectoral Distribution (Pie Chart)</h3>
+                    <!-- </div> -->
+                    <!-- <div id="highRiskPieChart-div"></div> -->
+                        <canvas id="highRiskPieChart"></canvas>
+                    <!-- </div> -->
+               </div>
+                <div class="chart-tile">
+                  <h3 class="chart-title">Risk-Return Profile (Radar Chart)</h3>
+                  <canvas id="highRiskRadarChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">Performance vs. Nifty 50 (Line Chart)</h3>
+                  <canvas id="highRiskLineChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">
+                     Valuation & Growth Potential (Bubble Chart)
+                  </h3>
+                  <canvas id="highRiskBubbleChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">
+                     Historical Volatility & Drawdowns (Area Chart)
+                  </h3>
+                  <canvas id="highRiskAreaChart"></canvas>
+               </div>
+               </div>
+            </div>
+         </div>
+         <div class="risk-bucket-content" v-if="activeTab === 'midRisk'">
+            <h2>Mid Risk Portfolio: Balanced Growth & Stability</h2>
+            <div class="chart-grid">
+               <div class="investor-Distribution-chart-tile">
+                  <h3 class="chart-title">Asset Class Mix (Bar Chart)</h3>
+                  <canvas id="midRiskBarChart"></canvas>
+               </div>
+               <div id="chart-container" class="chart-container">
+               <div class="chart-tile">
+                  <h3 class="chart-title">Geographical Distribution (Pie Chart)</h3>
+                  <canvas id="midRiskPieChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">
+                     Diversification & Risk Rating (Radar Chart)
+                  </h3>
+                  <canvas id="midRiskRadarChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">Long-Term Growth Trend (Line Chart)</h3>
+                  <canvas id="midRiskLineChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">Market Cap & Liquidity (Bubble Chart)</h3>
+                  <canvas id="midRiskBubbleChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">
+                     Cumulative Returns & Income (Area Chart)
+                  </h3>
+                  <canvas id="midRiskAreaChart"></canvas>
+               </div>
+               </div>
+            </div>
+         </div>
+         <div class="risk-bucket-content" v-if="activeTab === 'lowRisk'">
+            <h2>Low Risk Portfolio: Capital Preservation & Income</h2>
+            <div class="chart-grid">
+               <div class="investor-Distribution-chart-tile">
+                  <h3 class="chart-title">Fixed Income Distribution (Bar Chart)</h3>
+                  <canvas id="lowRiskBarChart"></canvas>
+               </div>
+               <div id="chart-container" class="chart-container">
+               <div class="chart-tile">
+                  <h3 class="chart-title">Investment Grade Allocation (Pie Chart)</h3>
+                  <canvas id="lowRiskPieChart"></canvas>
+               </div>
+                <div class="chart-tile">
+                  <h3 class="chart-title">
+                     Safety & Liquidity Profile (Radar Chart)
+                  </h3>
+                  <canvas id="lowRiskRadarChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">
+                     Yield & Interest Rate Sensitivity (Line Chart)
+                  </h3>
+                  <canvas id="lowRiskLineChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">Credit Rating & Duration (Bubble Chart)</h3>
+                  <canvas id="lowRiskBubbleChart"></canvas>
+               </div>
+               <div class="chart-tile">
+                  <h3 class="chart-title">
+                     Income Generation & Safety Net (Area Chart)
+                  </h3>
+                  <canvas id="lowRiskAreaChart"></canvas>
+               </div>
+               </div>
+            </div>
+         </div>
+         <div>
+            <!-- Dashboard Footer (moved inside #app for Vue control) -->
+            <footer class="dashboard-footer" v-show="showHeaderFooter">
+               <div class="footer-content">
+                  <div class="footer-logo-section">
+                     <img
+                        src="footer-logo.png"
+                        alt="sharekhan logo"
+                        class="footer-logo"
+                        />
+                     <div class="footer-company-desc">
+                        Mirae Asset Sharekhan – Founded in 2000, we were one of the
+                        first brokers to offer online trading in India.
+                     </div>
+                  </div>
+                  <div class="footer-info-section">
+                     <div class="footer-info-block">
+                        <div class="footer-info-title">
+                           <span style="font-size: 1.2em; vertical-align: middle"
+                              >🏢</span
+                              >
+                           Registered Office Address:
+                        </div>
+                        <div class="footer-info-text">
+                           Sharekhan Limited, 1st Floor, Tower No. 3, Equinox Business
+                           Park, LBS Marg, Off BKC, Kurla (West), Mumbai 400 070,
+                           Maharashtra, India.<br />
+                           <span style="font-size: 1.1em; vertical-align: middle"
+                              >📞</span
+                              >
+                           022 6750 2000
+                        </div>
+                     </div>
+                     <div class="footer-info-block">
+                        <div class="footer-info-title">
+                           <span style="font-size: 1.2em; vertical-align: middle"
+                              >🏢</span
+                              >
+                           Correspondence Address:
+                        </div>
+                        <div class="footer-info-text">
+                           10th Floor, Gigaplex Bldg. No. 9, Raheja Mindspace, Airoli
+                           Knowledge Park Rd, MSEB Staff Colony, TTC Industrial Area,
+                           Airoli, Navi Mumbai, Maharashtra 400708, India.<br />
+                           <span style="font-size: 1.1em; vertical-align: middle"
+                              >📞</span
+                              >
+                           022 - 6116 9000 / 6115 0000
+                           <span style="font-size: 1.1em; vertical-align: middle"
+                              >📠</span
+                              >
+                           022 6116 9699
+                        </div>
+                     </div>
+                     <div class="footer-contact-block">
+                        <div class="footer-contact-item">
+                           <span style="font-size: 1.1em; vertical-align: middle"
+                              >📞</span
+                              >
+                           02241523200 / 02241683500
+                        </div>
+                        <div class="footer-contact-item">
+                           <span style="font-size: 1.1em; vertical-align: middle"
+                              >✉️</span
+                              >
+                           <a
+                              href="mailto:myaccount@sharekhan.com"
+                              style="color: inherit; text-decoration: underline"
+                              >myaccount@sharekhan.com</a
+                              >
+                        </div>
+                        <div class="footer-contact-item">
+                           <span style="font-size: 1.1em; vertical-align: middle"
+                              >💬</span
+                              >
+                           <a
+                              href="https://chat.sharekhan.com/PreChatPage/Chat-Equity.asp"
+                              target="_blank"
+                              rel="noopener"
+                              style="color: inherit; text-decoration: underline"
+                              >Chat</a
+                              >
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </footer>
+         </div>
+         <!-- End of #app -->
+         <style>
+            .dashboard-footer {
+            width: 100vw;
+            background: linear-gradient(90deg, #23243a 80%, #2a2e3d 100%);
+            color: #fff;
+            padding: 2.5vw 0 2vw 0;
+            margin-top: 3vw;
+            box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.12);
+            font-size: 0.95em;
+            }
+            .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2vw;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 2vw;
+            }
+            .footer-logo-section {
+            flex: 1 1 260px;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1vw;
+            }
+            .footer-logo {
+            width: 180px;
+            height: auto;
+            margin-bottom: 0.7vw;
+            filter: drop-shadow(0 0 1.2vw #0008);
+            }
+            .footer-company-desc {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #ffb300;
+            margin-bottom: 0.5vw;
+            }
+            .footer-info-section {
+            flex: 3 1 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2vw;
+            }
+            .footer-info-block {
+            margin-bottom: 0.5vw;
+            }
+            .footer-info-title {
+            font-weight: 700;
+            color: #ffb300;
+            margin-bottom: 0.2vw;
+            font-size: 0.95em;
+            }
+            .footer-info-text {
+            color: #fff;
+            font-size: 0.95em;
+            line-height: 1.5em;
+            }
+            .footer-contact-block {
+            display: flex;
+            gap: 2vw;
+            margin-top: 1vw;
+            flex-wrap: wrap;
+            }
+            .footer-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            font-size: 0.95em;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 0.6em;
+            padding: 0.4em 1em;
+            }
+            .footer-icon {
+            width: 1.3em;
+            height: 1.3em;
+            margin-right: 0.3em;
+            vertical-align: middle;
+            filter: brightness(1.2) drop-shadow(0 0 2px #ffb30088);
+            }
+            @media (max-width: 900px) {
+            .footer-content {
+            flex-direction: column;
+            gap: 2vw;
+            align-items: flex-start;
+            }
+            .footer-logo-section,
+            .footer-info-section {
+            width: 100%;
+            min-width: 0;
+            }
+            .footer-contact-block {
+            gap: 1vw;
+            }
+            }
+            @media (max-width: 600px) {
+            .dashboard-footer {
+            font-size: 0.9em;
+            padding: 4vw 0 3vw 0;
+            }
+            .footer-content {
+            padding: 0 1vw;
+            }
+            .footer-logo {
+            width: 120px;
+            }
+            .footer-company-desc {
+            font-size: 1em;
+            }
+            .footer-contact-block {
+            flex-direction: column;
+            gap: 0.7vw;
+            }
+            }
+            body.light-mode .dashboard-footer {
+            background: linear-gradient(90deg, #f5f7fa 80%, #c3cfe2 100%);
+            color: #23243a;
+            box-shadow: 0 -2px 16px rgba(180, 180, 180, 0.1);
+            }
+            body.light-mode .footer-company-desc,
+            body.light-mode .footer-info-title {
+            color: #ffb300;
+            }
+            body.light-mode .footer-info-text,
+            body.light-mode .footer-contact-item {
+            color: #23243a;
+            background: rgba(0, 0, 0, 0.03);
+            }
+            body.light-mode .footer-icon {
+            filter: brightness(0.7) drop-shadow(0 0 2px #ffb30088);
+            }
+         </style>
+         <script>
+            // *** CRITICAL FIX: Ensure ChartDataLabels plugin is correctly registered ***
+            // Chart.js v2 uses Chart.plugins.register. For v3+, it's Chart.register(ChartDataLabels).
+            // This ensures the plugin is available for all charts.
+            if (
+              typeof ChartDataLabels !== "undefined" &&
+              !Chart.plugins.getAll().some((p) => p.id === "datalabels")
+            ) {
+              Chart.plugins.register(ChartDataLabels);
+            }
+            
+            // High/Mid/Low risk color schemes
+            const RISK_COLORS = {
+              highRisk: [
+                "#E63946",
+                "#FF6B6B",
+                "#B71C1C",
+                "#FF8A80",
+                "#FF1744",
+                "#C62828",
+              ], // reds
+              midRisk: [
+                "#FFD600",
+                "#FFEA00",
+                "#FFC107",
+                "#FFF176",
+                "#FFB300",
+                "#FFD54F",
+              ], // yellows
+              lowRisk: [
+                "#43A047",
+                "#66BB6A",
+                "#388E3C",
+                "#A5D6A7",
+                "#81C784",
+                "#C8E6C9",
+              ], // greens
+            };
+            
+            // Vue.js App
+            new Vue({
+              el: "#app",
+              data: {
+                activeTab: "overview", // Default active tab is the overview
+                charts: {}, // To store chart instances for cleanup/updates
+                themeIsDark: false,
+                hamburgerOpen: false,
+                headerHamburgerOpen: false,
+                branchNumber: "",
+                branchBuckets: null,
+                branchLoading: false,
+                branchError: null,
+                overviewData: null,
+                overviewError: null,
+                overviewLoading: false,
+                overviewBucketColors: [
+                  "#4F8EF7",
+                  "#F7B32B",
+                  "#E63946",
+                  "#43A047",
+                  "#FFD600",
+                  "#8E44AD",
+                  "#00B8A9",
+                  "#FF6B6B",
+                  "#6C757D",
+                ],
+                // --- Top customers arrays, initially empty, will be filled by API ---
+                topCustomersStockValue: [],
+                topCustomersDerivativeExposure: [],
+                topCustomersMarginShortfall: [],
+                topCustomersVoilation: [],
+                source:
+                  new URLSearchParams(window.location.search).get("source") || "",
+                refreshInterval: 15000, // default 15 seconds
+                refreshTimer: null,
+                isRefreshing: false,
+                refreshIntervalChanged: false,
+                fundSummaryBoxes: [
+                  { label: "Total Fund In", value: 0 },
+                  { label: "Total Fund Out", value: 0 },
+                  { label: "Margin Shortfall", value: 0 },
+                ],
+              },
+              computed: {
+                theme() {
+                  return this.themeIsDark ? "dark" : "light";
+                },
+                chartColors() {
+                  return this.themeIsDark
+                    ? { title: "#fff", datalabel: "#fff", legend: "#fff" }
+                    : { title: "#23243a", datalabel: "#23243a", legend: "#23243a" };
+                },
+                showHeaderFooter() {
+                  if (this.source !== "RT") {
+                    return true;
+                  } else {
+                    return false;
+                  }
+                  // return this.source !== 'RT';
+                  // return this.source !== 'RT';
+                },
+              },
+              watch: {
+                themeIsDark(newVal) {
+                  document.body.className = newVal ? "dark-mode" : "light-mode";
+                  // Reload charts to apply new theme
+                  this.$nextTick(() => {
+                    this.loadChartsForTab(this.activeTab);
+                  });
+                },
+                activeTab(newTab, oldTab) {
+                  this.destroyAllCharts(); // Destroy all charts from the previous tab
+                  this.$nextTick(() => {
+                    this.loadChartsForTab(newTab); // Load charts for the new tab
+                  });
+                },
+                refreshInterval(newVal, oldVal) {
+                  if (!this.refreshIntervalChanged) {
+                    this.startAutoRefresh();
+                  }
+                },
+              },
+              methods: {
+                toggleTheme() {
+                  this.themeIsDark = !this.themeIsDark;
+                },
+                switchTab(tabName) {
+                  // Add this method for hamburger dropdown
+                  this.activeTab = tabName;
+                  this.hamburgerOpen = false; // Close dropdown after selection
+                },
+                async fetchOverallBranches() {
+                  this.branchLoading = true;
+                  this.branchError = null;
+                  try {
+                    // --- API Integration ---
+                    // Use userId and token from URL params if available
+                    let userId = this.userId || null;
+                    let token = this.token || null;
+                    let apiUrl = "";
+                    let options = {};
+                    if (userId && token) {
+                      // Example API endpoint (replace with your real endpoint)
+                      apiUrl = `http://10.12.37.18:9459/riskOrchestrator/report/summary/${userId}`;
+                      options = {
+                        method: "GET",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "application/json",
+                        },
+                      };
+                      const response = await fetch(apiUrl, options);
+                      if (!response.ok)
+                        throw new Error("API error: " + response.status);
+                      const data = await response.json();
+                      // Expecting data in the same format as dummy data
+                      this.branchBuckets = data;
+                      this.overviewData = data;
+                      this.activeTab = "overview";
+                      this.$nextTick(() => this.loadChartsForTab("overview"));
+                      this.branchLoading = false;
+                      return;
+                    }
+                    // If no credentials, fall through to dummy data
+                    throw new Error("No credentials in URL");
+                  } catch (e) {
+                    // Fallback to static dummy data
+                    this.branchError = "API error.";
+                    this.branchBuckets = {
+                      a1: 200,
+                      a2: 150,
+                      a3: 120,
+                      a4: 90,
+                      a5: 180,
+                      a6: 60,
+                      a7: 110,
+                      a8: 130,
+                      a9: 80,
+                    };
+                    this.overviewData = this.branchBuckets;
+                    this.activeTab = "overview";
+                    this.$nextTick(() => this.loadChartsForTab("overview"));
+                  } finally {
+                    this.branchLoading = false;
+                  }
+                },
+                async searchBranch() {
+                  if (!this.branchNumber) {
+                    this.branchError = "Please enter a branch number.";
+                    return;
+                  }
+                  this.branchLoading = true;
+                  this.branchError = null;
+                  try {
+                    // --- API Integration for Branch Search ---
+                    let userId = this.userId || null;
+            
+                    let token = this.token || null;
+                    let branchNumber = this.branchNumber;
+                    let apiUrl = "";
+                    let options = {};
+                    if (userId && token && branchNumber) {
+                      // Example API endpoint (replace with your real endpoint)
+                      apiUrl = `http://10.12.37.18:9459/riskOrchestrator/report/summary/branch/${branchNumber}`;
+                      options = {
+                        method: "GET",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                          "Content-Type": "application/json",
+                        },
+                      };
+                      const response = await fetch(apiUrl, options);
+                      if (!response.ok)
+                        throw new Error("API error: " + response.status);
+                      const data = await response.json();
+                      // Expecting data in the same format as dummy data
+                      this.branchBuckets = data;
+                      this.overviewData = data;
+                      this.activeTab = "overview";
+                      this.$nextTick(() => this.loadChartsForTab("overview"));
+                      this.branchLoading = false;
+                      return;
+                    }
+                    throw new Error("Missing credentials or branch number");
+                  } catch (e) {
+                    // Fallback to static dummy data for demo
+                    this.branchError = "API error.";
+                    this.branchBuckets = {
+                      a1: 120,
+                      a2: 80,
+                      a3: 60,
+                      a4: 45,
+                      a5: 90,
+                      a6: 30,
+                      a7: 55,
+                      a8: 70,
+                      a9: 40,
+                    };
+                    this.overviewData = this.branchBuckets;
+                    this.activeTab = "overview";
+                    this.$nextTick(() => this.loadChartsForTab("overview"));
+                  } finally {
+                    this.branchLoading = false;
+                  }
+                },
+                changeBranch() {
+                  // Just clear the branch number and buckets, but do not hide dashboard
+                  this.branchNumber = "";
+                  this.branchBuckets = null;
+                  this.overviewData = null;
+                  this.overviewError = null;
+                },
+                // --- Generic Chart Creation Function ---
+                createChart(riskType, chartType, canvasId, data, options) {
+                  const ctx = document.getElementById(canvasId);
+                  if (!ctx) {
+                    console.error(
+                      `ERROR: Canvas element with ID '${canvasId}' not found for ${riskType} ${chartType} chart.`
+                    );
+                    return; // Exit if canvas not found
+                  }
+                  // --- Responsive Chart Sizing ---
+                  // Set canvas width/height based on parent/container and theme
+                  const parent = ctx.parentElement;
+            
+                  if (parent) {
+                    // Use responsive units for width/height
+                    ctx.width = Math.max(parent.offsetWidth * 0.98, 320); // min 320px for mobile
+                    ctx.height = Math.max(parent.offsetHeight * 0.98, 260); // min 260px for mobile
+                    // For overview, radar, and area charts, make them taller
+                    if (
+                      canvasId.toLowerCase().includes("radar") ||
+                      canvasId.toLowerCase().includes("area")
+                    ) {
+                      ctx.height = Math.max(parent.offsetHeight * 1.2, 340);
+                    }
+                    // Set chart-tile background based on theme
+                    parent.style.background = this.themeIsDark ? "#23243a" : "#fff";
+                    parent.style.borderRadius = "1.2rem";
+                    parent.style.boxShadow = this.themeIsDark
+                      ? "0 2px 12px rgba(0,0,0,0.25)"
+                      : "0 2px 12px rgba(0,0,0,0.08)";
+                  } else {
+                    ctx.width = 360;
+                    ctx.height = 260;
+                  }
+            
+                  // Destroy existing chart if it exists for this canvas to prevent conflicts
+                  if (this.charts[canvasId]) {
+                    this.charts[canvasId].destroy();
+                    delete this.charts[canvasId];
+                  }
+            
+                  this.charts[canvasId] = new Chart(ctx.getContext("2d"), {
+                    type: chartType,
+                    data: data,
+                    options: options,
+                  });
+                  // Set chart title color (for .chart-title)
+                  const titleEl = ctx.parentElement.querySelector(".chart-title");
+                  if (titleEl) titleEl.style.color = this.chartColors.title;
+                  // --- Chart background for theme ---
+                  ctx.style.backgroundColor = this.themeIsDark ? "#23243a" : "#fff";
+                  ctx.style.borderRadius = "1.2rem";
+                  ctx.style.boxShadow = this.themeIsDark
+                    ? "0 2px 12px rgba(0,0,0,0.25)"
+                    : "0 2px 12px rgba(0,0,0,0.08)";
+                },
+            
+                // --- Chart Data & Options for Investor Distribution Overview (Multiple Charts) ---
+                getInvestorDistributionBarChartConfig(data, theme) {
+                  const isDark = theme === "dark";
+                  return {
+                    data: {
+                      labels: Object.keys(data),
+                      datasets: [
+                        {
+                          label: "Number of Clients",
+                          data: Object.values(data),
+                          backgroundColor: this.overviewBucketColors,
+                          borderColor: this.overviewBucketColors.map((c) => c),
+                          borderWidth: 1,
+                        },
+                      ],
+                    },
+                    options: {
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          title: {
+                            display: true,
+                            text: "Number of Clients",
+                            color: isDark ? "#fff" : "#23243a",
+                          },
+                          ticks: {
+                            precision: 0,
+                            color: isDark ? "#fff" : "#23243a",
+                          },
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.05)",
+                          },
+                        },
+                        x: {
+                          grid: { display: false },
+                          ticks: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                      },
+            
+                      plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                          display: true,
+                          color: isDark ? "#fff" : "#23243a",
+                          anchor: "end",
+                          align: "top",
+                          offset: 5,
+                          formatter: (value) => `${value}`,
+                          font: { weight: "bold", size: 14 },
+                        },
+                        tooltip: {
+                          enabled: true,
+                          mode: "index",
+                          intersect: false,
+                          callbacks: {
+                            label: (context) => {
+                              let label = context.dataset.label || "";
+                              if (label) label += ": ";
+                              if (context.parsed.y !== null)
+                                label += `${context.parsed.y} Clients`;
+                              return label;
+                            },
+                            title: (context) => context[0].label,
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                getInvestorDistributionPieChartConfig(data, theme) {
+                  const isDark = theme === "dark";
+                  return {
+                    data: {
+                      labels: Object.keys(data),
+                      datasets: [
+                        {
+                          data: Object.values(data),
+                          backgroundColor: this.overviewBucketColors,
+                          borderColor: isDark ? "#23243a" : "#fff",
+                          borderWidth: 2,
+                        },
+                      ],
+                    },
+                    options: {
+                      plugins: {
+                        legend: {
+                          position: "right",
+                          labels: {
+                            color: isDark ? "#fff" : "#23243a",
+                            padding: 15,
+                            font: { size: 11 },
+                          },
+                        },
+                        datalabels: {
+                          display: true,
+                          color: isDark ? "#fff" : "#23243a",
+                          formatter: (value, context) => {
+                            const total =
+                              context.chart.data.datasets[0].data.reduce(
+                                (a, b) => a + b,
+                                0
+                              );
+                            if (total === 0) return "0%";
+                            return ((value / total) * 100).toFixed(1) + "%";
+                          },
+                          font: { weight: "bold" },
+                          textShadowBlur: 5,
+                          textShadowColor: isDark
+                            ? "rgba(0,0,0,0.5)"
+                            : "rgba(255,255,255,0.5)",
+                        },
+                      },
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const label = context.label || "";
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce(
+                              (a, b) => a + b,
+                              0
+                            );
+                            const percentage =
+                              total === 0
+                                ? "0.0"
+                                : ((value / total) * 100).toFixed(1);
+                            return `${label}: ${new Intl.NumberFormat("en-IN", {
+                              style: "currency",
+                              currency: "INR",
+                            }).format(value)} (${percentage}%)`;
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+                getInvestorDistributionDoughnutChartConfig(data, theme) {
+                  const isDark = theme === "dark";
+                  return {
+                    data: {
+                      labels: Object.keys(data),
+                      datasets: [
+                        {
+                          data: Object.values(data),
+                          backgroundColor: this.overviewBucketColors,
+                          borderColor: isDark ? "#23243a" : "#fff",
+                          borderWidth: 2,
+                        },
+                      ],
+                    },
+                    options: {
+                      rotation: -90,
+                      circumference: 360,
+                      cutout: "60%",
+                      plugins: {
+                        legend: {
+                          position: "bottom",
+                          labels: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                        datalabels: {
+                          display: true,
+                          color: isDark ? "#fff" : "#23243a",
+                          formatter: (value) => `${value}`,
+                          font: { weight: "bold", size: 14 },
+                          textShadowBlur: 5,
+                          textShadowColor: isDark
+                            ? "rgba(0,0,0,0.5)"
+                            : "rgba(255,255,255,0.5)",
+                        },
+                      },
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const label = context.label || "";
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce(
+                              (a, b) => a + b,
+                              0
+                            );
+                            const percentage =
+                              total === 0
+                                ? "0.0"
+                                : ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} Clients (${percentage}%)`;
+                          },
+                        },
+                      },
+                      elements: { arc: { borderWidth: 0 } },
+                    },
+                  };
+                },
+                getOverviewRadarChartConfig(theme) {
+                  const isDark = theme === "dark";
+                  const labels = [
+                    "Volatility",
+                    "Growth Potential",
+                    "Income Stability",
+                    "Liquidity",
+                    "Diversification",
+                    "Risk Score",
+                  ];
+                  const highRiskData = [9, 9, 4, 7, 6, 9];
+                  const midRiskData = [6, 7, 6, 8, 8, 6];
+                  const lowRiskData = [3, 4, 9, 9, 8, 3];
+                  return {
+                    data: {
+                      labels,
+                      datasets: [
+                        {
+                          label: "High Risk",
+                          data: highRiskData,
+                          backgroundColor: "rgba(230,57,70,0.25)",
+                          borderColor: "#E63946",
+                          pointBackgroundColor: "#E63946",
+                          pointBorderColor: isDark ? "#fff" : "#23243a",
+                          pointRadius: 5,
+                          fill: true,
+                        },
+                        {
+                          label: "Mid Risk",
+                          data: midRiskData,
+                          backgroundColor: "rgba(255,214,0,0.25)",
+                          borderColor: "#FFD600",
+                          pointBackgroundColor: "#FFD600",
+                          pointBorderColor: isDark ? "#fff" : "#23243a",
+                          pointRadius: 5,
+                          fill: true,
+                        },
+                        {
+                          label: "Low Risk",
+                          data: lowRiskData,
+                          backgroundColor: "rgba(67, 160, 71, 0.25)",
+                          borderColor: "#43A047",
+                          pointBackgroundColor: "#43A047",
+                          pointBorderColor: isDark ? "#fff" : "#23243a",
+                          pointRadius: 5,
+                          fill: true,
+                        },
+                      ],
+                    },
+                    options: {
+                      plugins: {
+                        legend: {
+                          position: "top",
+                          labels: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                        datalabels: { display: false },
+                        tooltip: {
+                          enabled: true,
+                          callbacks: {
+                            label: function (context) {
+                              return `${context.dataset.label}: ${context.formattedValue}`;
+                            },
+                          },
+                          backgroundColor: isDark ? "#23243a" : "#fff",
+                          titleColor: isDark ? "#fff" : "#23243a",
+                          bodyColor: isDark ? "#fff" : "#23243a",
+                          borderColor: isDark ? "#fff" : "#23243a",
+                          borderWidth: 1,
+                        },
+                      },
+                      scales: {
+                        r: {
+                          angleLines: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.15)"
+                              : "rgba(0,0,0,0.08)",
+                          },
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.15)"
+                              : "rgba(0,0,0,0.08)",
+                          },
+                          pointLabels: {
+                            color: isDark ? "#fff" : "#23243a",
+                            font: { size: 13 },
+                          },
+                          ticks: {
+                            color: isDark ? "#fff" : "#23243a",
+                            stepSize: 1,
+                            min: 0,
+                            max: 10,
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                // --- Chart Data & Options for each specific chart type, parameterized by risk data ---
+            
+                // BAR CHART CONFIG for individual risk buckets
+                getBarChartConfig(riskData, riskType, theme) {
+                  const isDark = theme === "dark";
+                  const textColor = isDark ? "#fff" : "#23243a";
+                  const gridColor = isDark
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(0,0,0,0.05)";
+                  return {
+                    data: {
+                      labels: Object.keys(riskData),
+                      datasets: [
+                        {
+                          label: "Current Valuation (INR)",
+                          data: Object.values(riskData),
+                          backgroundColor: RISK_COLORS[riskType],
+                          borderColor: RISK_COLORS[riskType].map((color) => color),
+                          borderWidth: 1,
+                        },
+                      ],
+                    },
+                    options: {
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          title: {
+                            display: true,
+                            text: "Value in INR",
+                            color: textColor,
+                          },
+                          grid: { color: gridColor },
+                          ticks: { color: textColor },
+                        },
+                        x: {
+                          grid: { display: false },
+                          ticks: { color: textColor },
+                        },
+                      },
+                      plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                          display: true,
+                          color: textColor,
+                          anchor: "end",
+                          align: "top",
+                          offset: 5,
+                          formatter: (value) => {
+                            if (value !== null)
+                              return `₹${value.toLocaleString("en-IN")}`;
+                            return "";
+                          },
+                          font: { weight: "bold", size: 12 },
+                        },
+                      },
+                      tooltip: {
+                        enabled: true,
+                        mode: "index",
+                        intersect: false,
+                        callbacks: {
+                          label: (context) => {
+                            let label = context.dataset.label || "";
+                            if (label) label += ": ";
+                            if (context.parsed.y !== null)
+                              label += new Intl.NumberFormat("en-IN", {
+                                style: "currency",
+                                currency: "INR",
+                              }).format(context.parsed.y);
+                            return label;
+                          },
+                          title: (context) => context[0].label,
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                // PIE CHART CONFIG for individual risk buckets
+                getPieChartConfig(riskData, riskType, theme) {
+                  const isDark = theme === "dark";
+                  return {
+                    data: {
+                      labels: Object.keys(riskData),
+                      datasets: [
+                        {
+                          data: Object.values(riskData),
+                          backgroundColor: RISK_COLORS[riskType],
+                          borderColor: isDark ? "#23243a" : "#fff",
+                          borderWidth: 2,
+                        },
+                      ],
+                    },
+                    options: {
+                      plugins: {
+                        legend: {
+                          position: "right",
+                          labels: {
+                            color: isDark ? "#fff" : "#23243a",
+                            padding: 15,
+                            font: { size: 11 },
+                          },
+                        },
+                        datalabels: {
+                          display: true,
+                          color: isDark ? "#fff" : "#23243a",
+                          formatter: (value, context) => {
+                            const total =
+                              context.chart.data.datasets[0].data.reduce(
+                                (a, b) => a + b,
+                                0
+                              );
+                            if (total === 0) return "0%";
+                            return ((value / total) * 100).toFixed(1) + "%";
+                          },
+                          font: { weight: "bold" },
+                          textShadowBlur: 5,
+                          textShadowColor: isDark
+                            ? "rgba(0,0,0,0.5)"
+                            : "rgba(255,255,255,0.5)",
+                        },
+                      },
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const label = context.label || "";
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce(
+                              (a, b) => a + b,
+                              0
+                            );
+                            const percentage =
+                              total === 0
+                                ? "0.0"
+                                : ((value / total) * 100).toFixed(1);
+                            return `${label}: ${new Intl.NumberFormat("en-IN", {
+                              style: "currency",
+                              currency: "INR",
+                            }).format(value)} (${percentage}%)`;
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                // LINE CHART CONFIG for individual risk buckets
+                getLineChartConfig(riskData, riskType, theme) {
+                  const isDark = theme === "dark";
+                  const labels = [
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                  ];
+                  let performanceData = [];
+                  let benchmarkData = [];
+                  let asset1Label = "";
+                  let asset2Label = "";
+            
+                  if (riskType === "highRisk") {
+                    asset1Label = "Growth Fund A";
+                    asset2Label = "Nifty 50";
+                    performanceData = [
+                      100000, 105000, 98000, 112000, 108000, 125000, 118000, 130000,
+                      122000, 138000, 130000, 145000,
+                    ];
+                    benchmarkData = [
+                      100000, 101000, 100500, 102000, 103000, 104500, 104000,
+                      105500, 106000, 107500, 107000, 108000,
+                    ];
+                  } else if (riskType === "midRisk") {
+                    asset1Label = "Balanced Portfolio";
+                    asset2Label = "Hybrid 60/40 Index";
+                    performanceData = [
+                      100000, 102000, 101000, 104000, 105000, 106500, 107000,
+                      108500, 109000, 110500, 111000, 112000,
+                    ];
+                    benchmarkData = [
+                      100000, 101500, 101800, 103000, 104000, 105000, 106000,
+                      107000, 107500, 108500, 109000, 109500,
+                    ];
+                  } else if (riskType === "lowRisk") {
+                    asset1Label = "Debt Portfolio";
+                    asset2Label = "Fixed Income Index";
+                    performanceData = [
+                      100000, 100500, 100800, 101200, 101500, 101800, 102000,
+                      102200, 102500, 102800, 103000, 103200,
+                    ];
+                    benchmarkData = [
+                      100000, 100300, 100600, 100900, 101200, 101500, 101800,
+                      102100, 102400, 102700, 103000, 103300,
+                    ];
+                  }
+            
+                  return {
+                    data: {
+                      labels,
+                      datasets: [
+                        {
+                          label: asset1Label,
+                          data: performanceData,
+                          borderColor: "rgba(75, 192, 192, 1)",
+                          backgroundColor: "rgba(75, 192, 192, 0.1)",
+                          borderWidth: 2,
+                          fill: false,
+                          tension: 0.3,
+                          pointBackgroundColor: "rgba(75, 192, 192, 1)",
+                          pointBorderColor: "#fff",
+                          pointHoverRadius: 6,
+                        },
+                        {
+                          label: asset2Label,
+                          data: benchmarkData,
+                          borderColor: "rgba(153, 102, 255, 1)",
+                          backgroundColor: "rgba(153, 102, 255, 0.1)",
+                          borderWidth: 2,
+                          fill: false,
+                          tension: 0.3,
+                          pointBackgroundColor: "rgba(153, 102, 255, 1)",
+                          pointBorderColor: "#fff",
+                          pointHoverRadius: 6,
+                        },
+                      ],
+                    },
+                    options: {
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          title: {
+                            display: true,
+                            text: "Value (INR)",
+                            color: isDark ? "#fff" : "#23243a",
+                          },
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.05)",
+                          },
+                          ticks: {
+                            color: isDark ? "#fff" : "#23243a",
+                            callback: function (value) {
+                              return new Intl.NumberFormat("en-IN", {
+                                style: "currency",
+                                currency: "INR",
+                                maximumFractionDigits: 0,
+                              }).format(value);
+                            },
+                          },
+                        },
+                        x: {
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.05)",
+                          },
+                          ticks: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                      },
+                      plugins: {
+                        legend: {
+                          position: "top",
+                          labels: {
+                            boxWidth: 20,
+                            padding: 20,
+                            color: isDark ? "#fff" : "#23243a",
+                          },
+                        },
+                        datalabels: { display: false },
+                      },
+                      tooltip: {
+                        enabled: true,
+                        mode: "index",
+                        intersect: false,
+                        callbacks: {
+                          label: (context) => {
+                            let label = context.dataset.label || "";
+                            if (label) label += ": ";
+                            if (context.parsed.y !== null)
+                              label += new Intl.NumberFormat("en-IN", {
+                                style: "currency",
+                                currency: "INR",
+                              }).format(context.parsed.y);
+                            return label;
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                getRadarChartConfig(riskData, riskType, theme) {
+                  const isDark = theme === "dark";
+                  let labels = [];
+                  let dataPoints = [];
+                  // Set radar color based on risk type
+                  let radarColor = RISK_COLORS.highRisk[0]; // Default red
+                  let radarBg = "rgba(230, 57, 70, 0.3)";
+                  if (riskType === "midRisk") {
+                    radarColor = RISK_COLORS.midRisk[0]; // Yellow
+                    radarBg = "rgba(255, 214, 0, 0.3)";
+                  } else if (riskType === "lowRisk") {
+                    radarColor = RISK_COLORS.lowRisk[0]; // Green
+                    radarBg = "rgba(67, 160, 71, 0.3)";
+                  }
+            
+                  if (riskType === "highRisk") {
+                    labels = [
+                      "Volatility",
+                      "Growth Potential",
+                      "Beta",
+                      "Liquidity",
+                      "Diversification",
+                      "Max Drawdown",
+                    ];
+            
+                    dataPoints = [9, 9, 8, 7, 6, 9];
+                  } else if (riskType === "midRisk") {
+                    labels = [
+                      "Volatility",
+                      "Growth Potential",
+                      "Income Stability",
+                      "Liquidity",
+                      "Diversification",
+                      "Risk Score",
+                    ];
+                    dataPoints = [6, 7, 6, 8, 8, 6];
+                  } else if (riskType === "lowRisk") {
+                    labels = [
+                      "Capital Safety",
+                      "Income Stability",
+                      "Liquidity",
+                      "Interest Rate Risk",
+                      "Diversification",
+                      "Credit Risk",
+                    ];
+                    dataPoints = [9, 9, 9, 4, 8, 3];
+                  }
+            
+                  return {
+                    data: {
+                      labels,
+                      datasets: [
+                        {
+                          label:
+                            riskType === "highRisk"
+                              ? "High Risk"
+                              : riskType === "midRisk"
+                              ? "Mid Risk"
+                              : "Low Risk",
+                          data: dataPoints,
+                          backgroundColor: radarBg,
+                          borderColor: radarColor,
+                          pointBackgroundColor: radarColor,
+                          pointBorderColor: isDark ? "#fff" : "#23243a",
+                          pointRadius: 5,
+                          fill: true,
+                        },
+                      ],
+                    },
+                    options: {
+                      plugins: {
+                        legend: {
+                          position: "top",
+                          labels: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                        datalabels: { display: false },
+                        tooltip: {
+                          enabled: true,
+                          callbacks: {
+                            label: function (context) {
+                              return `${context.dataset.label}: ${context.formattedValue}`;
+                            },
+                          },
+                          backgroundColor: isDark ? "#23243a" : "#fff",
+                          titleColor: isDark ? "#fff" : "#23243a",
+                          bodyColor: isDark ? "#fff" : "#23243a",
+                          borderColor: isDark ? "#fff" : "#23243a",
+                          borderWidth: 1,
+                        },
+                      },
+                      scales: {
+                        r: {
+                          angleLines: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.15)"
+                              : "rgba(0,0,0,0.08)",
+                          },
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.15)"
+                              : "rgba(0,0,0,0.08)",
+                          },
+                          pointLabels: {
+                            color: isDark ? "#fff" : "#23243a",
+                            font: { size: 13 },
+                          },
+                          ticks: {
+                            color: isDark ? "#fff" : "#23243a",
+                            stepSize: 1,
+                            min: 0,
+                            max: 10,
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                // BUBBLE CHART CONFIG for individual risk buckets
+                getBubbleChartConfig(riskData, riskType, theme) {
+                  const isDark = theme === "dark";
+                  let bubbleData = [];
+                  // Using values from riskData for bubble sizes (r)
+                  if (riskType === "highRisk") {
+                    bubbleData = [
+                      {
+                        x: 12,
+                        y: 0.8,
+                        r: Math.max(10, riskData["Tech Disruptors"] / 20000),
+                      },
+                      {
+                        x: 9,
+                        y: 0.6,
+                        r: Math.max(10, riskData["Small Cap Growth"] / 20000),
+                      },
+                      {
+                        x: 7,
+                        y: 0.5,
+                        r: Math.max(
+                          10,
+                          riskData["Emerging Market Equities"] / 20000
+                        ),
+                      },
+                      {
+                        x: 5,
+                        y: 0.4,
+                        r: Math.max(10, riskData["Biotech Innovation"] / 20000),
+                      },
+                    ];
+                  } else if (riskType === "midRisk") {
+                    bubbleData = [
+                      {
+                        x: 6,
+                        y: 0.4,
+                        r: Math.max(10, riskData["Large Cap Diversified"] / 20000),
+                      },
+                      {
+                        x: 5,
+                        y: 0.3,
+                        r: Math.max(10, riskData["Balanced Mutual Fund"] / 20000),
+                      },
+                      {
+                        x: 4,
+                        y: 0.2,
+                        r: Math.max(10, riskData["Real Estate ETF"] / 20000),
+                      },
+                      {
+                        x: 3,
+                        y: 0.15,
+                        r: Math.max(
+                          10,
+                          riskData["Corporate Bonds (A-rated)"] / 20000
+                        ),
+                      },
+                    ];
+                  } else if (riskType === "lowRisk") {
+                    bubbleData = [
+                      {
+                        x: 2,
+                        y: 0.05,
+                        r: Math.max(10, riskData["Government Securities"] / 20000),
+                      },
+                      {
+                        x: 2.5,
+                        y: 0.08,
+                        r: Math.max(10, riskData["AAA Corporate Bonds"] / 20000),
+                      },
+                      {
+                        x: 1.5,
+                        y: 0.03,
+                        r: Math.max(10, riskData["Money Market Funds"] / 20000),
+                      },
+                      {
+                        x: 1,
+                        y: 0.02,
+                        r: Math.max(10, riskData["Fixed Deposits"] / 20000),
+                      },
+                    ];
+                  }
+            
+                  return {
+                    data: {
+                      datasets: [
+                        {
+                          label: "Expected Return vs. Beta (Bubble Size: AUM)",
+                          data: bubbleData,
+                          backgroundColor: "rgba(54, 162, 235, 0.7)",
+                          borderColor: "rgba(54, 162, 235, 1)",
+                        },
+                      ],
+                    },
+                    options: {
+                      scales: {
+                        x: {
+                          title: {
+                            display: true,
+                            text: "Expected Annualized Return (%)",
+                            color: isDark ? "#fff" : "#23243a",
+                          },
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.05)",
+                          },
+                          ticks: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                        y: {
+                          title: {
+                            display: true,
+                            text: "Portfolio Beta",
+                            color: isDark ? "#fff" : "#23243a",
+                          },
+                          beginAtZero: true,
+                          max: 1,
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.05)",
+                          },
+                          ticks: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                      },
+                      plugins: {
+                        legend: {
+                          display: true,
+                          position: "top",
+                          labels: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                        datalabels: { display: false },
+                      },
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            const data = context.parsed;
+                            const assetLabels = Object.keys(riskData);
+                            const assetLabel =
+                              assetLabels[context.dataIndex] || "Asset";
+                            return `${assetLabel} - Ret: ${data.x.toFixed(
+                              1
+                            )}%, Beta: ${data.y.toFixed(2)}, AUM: ₹${(
+                              data.r * 20000
+                            ).toLocaleString("en-IN")}`;
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                // AREA CHART CONFIG (Cumulative Returns) for individual risk buckets
+                getAreaChartConfig(riskData, riskType, theme) {
+                  const isDark = theme === "dark";
+                  const labels = [
+                    "Q1-23",
+                    "Q2-23",
+                    "Q3-23",
+                    "Q4-23",
+                    "Q1-24",
+                    "Q2-24",
+                    "Q3-24",
+                    "Q4-24",
+                  ];
+                  let returnsData = [];
+            
+                  if (riskType === "highRisk") {
+                    returnsData = [
+                      100000, 108000, 102000, 120000, 115000, 135000, 128000,
+                      148000,
+                    ];
+                  } else if (riskType === "midRisk") {
+                    returnsData = [
+                      100000, 104000, 107000, 110000, 113000, 116000, 119000,
+                      122000,
+                    ];
+                  } else if (riskType === "lowRisk") {
+                    returnsData = [
+                      100000, 101500, 102800, 104000, 105000, 106200, 107500,
+                      108500,
+                    ];
+                  }
+            
+                  return {
+                    data: {
+                      labels,
+                      datasets: [
+                        {
+                          label: "Cumulative Portfolio Value (INR)",
+                          data: returnsData,
+                          borderColor: "rgba(255, 159, 64, 1)",
+                          backgroundColor: "rgba(255, 159, 64, 0.4)",
+                          borderWidth: 2,
+                          fill: true,
+                          tension: 0.2,
+                          pointBackgroundColor: "rgba(255, 159, 64, 1)",
+                          pointBorderColor: isDark ? "#fff" : "#23243a",
+                          pointHoverRadius: 6,
+                        },
+                      ],
+                    },
+                    options: {
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          title: {
+                            display: true,
+                            text: "Portfolio Value (INR)",
+                            color: isDark ? "#fff" : "#23243a",
+                          },
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.05)",
+                          },
+                          ticks: {
+                            color: isDark ? "#fff" : "#23243a",
+                            callback: function (value) {
+                              return new Intl.NumberFormat("en-IN", {
+                                style: "currency",
+                                currency: "INR",
+                                maximumFractionDigits: 0,
+                              }).format(value);
+                            },
+                          },
+                        },
+                        x: {
+                          grid: {
+                            color: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.05)",
+                          },
+                          ticks: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                      },
+                      plugins: {
+                        legend: {
+                          display: true,
+                          labels: { color: isDark ? "#fff" : "#23243a" },
+                        },
+                        datalabels: { display: false },
+                      },
+                      tooltip: {
+                        enabled: true,
+                        callbacks: {
+                          label: (context) => {
+                            let label = context.dataset.label || "";
+                            if (label) label += ": ";
+                            if (context.parsed.y !== null)
+                              label += new Intl.NumberFormat("en-IN", {
+                                style: "currency",
+                                currency: "INR",
+                              }).format(context.parsed.y);
+                            return label;
+                          },
+                        },
+                      },
+                    },
+                  };
+                },
+            
+                // --- Core Logic for Tab Management ---
+                async loadChartsForTab(tabName) {
+                  this.destroyAllCharts();
+                  const theme = this.theme;
+                  if (tabName === "overview") {
+                    if (!this.branchBuckets) {
+                      this.overviewError = "No branch data loaded.";
+                      return;
+                    }
+                    this.overviewLoading = false;
+                    this.overviewError = null;
+                    this.overviewData = this.branchBuckets;
+                    this.createChart(
+                      "overview",
+                      "bar",
+                      "investorDistributionBarChart",
+                      this.getInvestorDistributionBarChartConfig(
+                        this.overviewData,
+                        theme
+                      ).data,
+                      this.getInvestorDistributionBarChartConfig(
+                        this.overviewData,
+                        theme
+                      ).options
+                    );
+                    return;
+                  } else {
+                    let currentData = {};
+                    if (tabName === "highRisk") {
+                      currentData = {
+                        "Small Cap Growth": 450000,
+                        "Tech Disruptors": 550000,
+                        "Emerging Market Equities": 300000,
+                        "High-Yield Bonds": 180000,
+                        "Biotech Innovation": 380000,
+                        "Future Tech Fund": 420000,
+                      };
+                    } else if (tabName === "midRisk") {
+                      currentData = {
+                        "Large Cap Diversified": 700000,
+                        "Balanced Mutual Fund": 600000,
+                        "Real Estate ETF": 350000,
+                        "Corporate Bonds (A-rated)": 400000,
+                        "International Developed Equities": 500000,
+                        "Gold & Commodities": 250000,
+                      };
+                    } else if (tabName === "lowRisk") {
+                      currentData = {
+                        "Government Securities": 900000,
+                        "AAA Corporate Bonds": 600000,
+                        "Money Market Funds": 400000,
+                        "Fixed Deposits": 250000,
+                        "Large Cap Dividend Stocks": 300000,
+                        "Ultra Short Duration Funds": 180000,
+                      };
+                    }
+            
+                    const chartsToCreate = [
+                      {
+                        id: `${tabName}BarChart`,
+                        type: "bar",
+                        config: this.getBarChartConfig(currentData, tabName, theme),
+                      },
+                      {
+                        id: `${tabName}PieChart`,
+                        type: "pie",
+                        config: this.getPieChartConfig(currentData, tabName, theme),
+                      },
+                      {
+                        id: `${tabName}LineChart`,
+                        type: "line",
+                        config: this.getLineChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                      {
+                        id: `${tabName}RadarChart`,
+                        type: "radar",
+                        config: this.getRadarChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                      {
+                        id: `${tabName}BubbleChart`,
+                        type: "bubble",
+                        config: this.getBubbleChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                      {
+                        id: `${tabName}AreaChart`,
+                        type: "line",
+                        config: this.getAreaChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                    ];
+            
+                    chartsToCreate.forEach((chart) => {
+                      this.createChart(
+                        tabName,
+                        chart.type,
+                        chart.id,
+                        chart.config.data,
+                        chart.config.options
+                      );
+                    });
+                  }
+                },
+            
+                // Method to destroy ALL charts
+                destroyAllCharts() {
+                  for (const id in this.charts) {
+                    if (
+                      this.charts[id] &&
+                      typeof this.charts[id].destroy === "function"
+                    ) {
+                      this.charts[id].destroy();
+                      delete this.charts[id];
+                    }
+                  }
+                },
+                async fetchTopCustomers() {
+                  // Replace these URLs with your real API endpoints
+                  const userId = this.userId || "";
+                  const token = this.token || "";
+                  const branchNumber = this.branchNumber || "";
+                  const headers = token
+                    ? {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                      }
+                    : { "Content-Type": "application/json" };
+                  // Example endpoints (update as needed)
+                  const stockValueUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=StkValue&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  const derivativeExposureUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=DerivativeExposure&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  const marginShortfallUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=MarginShortFall&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  const VoilationUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=Voilation&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  try {
+                    // Fetch all three in parallel
+                    const [stockRes, derivativeRes, marginRes] = await Promise.all([
+                      fetch(stockValueUrl, { headers }),
+                      fetch(derivativeExposureUrl, { headers }),
+                      fetch(marginShortfallUrl, { headers }),
+                      fetch(VoilationUrl, { headers }),
+                    ]);
+                    if (stockRes.ok) {
+                      this.topCustomersStockValue = await stockRes.json();
+                    } else {
+                      throw new Error("Stock Value API error");
+                    }
+                    if (derivativeRes.ok) {
+                      this.topCustomersDerivativeExposure =
+                        await derivativeRes.json();
+                    } else {
+                      throw new Error("Derivative Exposure API error");
+                    }
+                    if (marginRes.ok) {
+                      this.topCustomersMarginShortfall = await marginRes.json();
+                    } else {
+                      throw new Error("Margin Shortfall API error");
+                    }
+                    if (VoilationRes.ok) {
+                      this.topCustomersVoilation = await VoilationRes.json();
+                    } else {
+                      throw new Error("Voilation API error");
+                    }
+                  } catch (e) {
+                    // Fallback to static dummy data if any API fails
+                    this.topCustomersStockValue = [
+                      { custId: 123, custName: "Shivam", value: 190072 },
+                      { custId: 125, custName: "Shubham", value: 180721 },
+                      { custId: 127, custName: "Tanishka", value: 171172 },
+                      { custId: 128, custName: "Amit", value: 165000 },
+                      { custId: 129, custName: "Priya", value: 162500 },
+                      { custId: 130, custName: "Rahul", value: 160000 },
+                      { custId: 131, custName: "Sneha", value: 158000 },
+                      { custId: 132, custName: "Vikas", value: 155000 },
+                      { custId: 133, custName: "Riya", value: 153000 },
+                      { custId: 134, custName: "Karan", value: 150000 },
+                      { custId: 135, custName: "Ayesha", value: 148000 },
+                      { custId: 136, custName: "Manish", value: 146000 },
+                      { custId: 137, custName: "Neha", value: 144000 },
+                      { custId: 138, custName: "Sahil", value: 142000 },
+                      { custId: 139, custName: "Divya", value: 140000 },
+                      { custId: 140, custName: "Rohit", value: 138000 },
+                      { custId: 141, custName: "Megha", value: 136000 },
+                      { custId: 142, custName: "Ankit", value: 134000 },
+                      { custId: 143, custName: "Simran", value: 132000 },
+                      { custId: 144, custName: "Deepak", value: 130000 },
+                    ];
+                    this.topCustomersDerivativeExposure = [
+                      { custId: 223, custName: "Shivam", value: 120000 },
+                      { custId: 225, custName: "Shubham", value: 110000 },
+                      { custId: 227, custName: "Tanishka", value: 105000 },
+                      { custId: 228, custName: "Amit", value: 98000 },
+                      { custId: 229, custName: "Priya", value: 97000 },
+                      { custId: 230, custName: "Rahul", value: 95000 },
+                      { custId: 231, custName: "Sneha", value: 94000 },
+                      { custId: 232, custName: "Vikas", value: 93000 },
+                      { custId: 233, custName: "Riya", value: 92000 },
+                      { custId: 234, custName: "Karan", value: 91000 },
+                      { custId: 235, custName: "Ayesha", value: 90000 },
+                      { custId: 236, custName: "Manish", value: 89000 },
+                      { custId: 237, custName: "Neha", value: 88000 },
+                      { custId: 238, custName: "Sahil", value: 87000 },
+                      { custId: 239, custName: "Divya", value: 86000 },
+                      { custId: 240, custName: "Rohit", value: 85000 },
+                      { custId: 241, custName: "Megha", value: 84000 },
+                      { custId: 242, custName: "Ankit", value: 83000 },
+                      { custId: 243, custName: "Simran", value: 82000 },
+                      { custId: 244, custName: "Deepak", value: 81000 },
+                    ];
+                    this.topCustomersMarginShortfall = [
+                      { custId: 323, custName: "Shivam", value: 35000 },
+                      { custId: 325, custName: "Shubham", value: 32000 },
+                      { custId: 327, custName: "Tanishka", value: 31000 },
+                      { custId: 328, custName: "Amit", value: 29500 },
+                      { custId: 329, custName: "Priya", value: 29000 },
+                      { custId: 330, custName: "Rahul", value: 28500 },
+                      { custId: 331, custName: "Sneha", value: 28000 },
+                      { custId: 332, custName: "Vikas", value: 27000 },
+                      { custId: 333, custName: "Riya", value: 26500 },
+                      { custId: 334, custName: "Karan", value: 26000 },
+                      { custId: 335, custName: "Ayesha", value: 25500 },
+                      { custId: 336, custName: "Manish", value: 25000 },
+                      { custId: 337, custName: "Neha", value: 24500 },
+                      { custId: 338, custName: "Sahil", value: 24000 },
+                      { custId: 339, custName: "Divya", value: 23500 },
+                      { custId: 340, custName: "Rohit", value: 23000 },
+                      { custId: 341, custName: "Megha", value: 22500 },
+                      { custId: 342, custName: "Ankit", value: 22000 },
+                      { custId: 343, custName: "Simran", value: 21500 },
+                      { custId: 344, custName: "Deepak", value: 21000 },
+                    ];
+                    this.topCustomersVoilation = [
+                      { custId: 323, custName: "Shivam", value: 93678159478534 },
+                      { custId: 325, custName: "Shubham", value: 32000 },
+                      { custId: 327, custName: "Tanishka", value: 31000 },
+                      { custId: 328, custName: "Amit", value: 29500 },
+                      { custId: 329, custName: "Priya", value: 29000 },
+                      { custId: 330, custName: "Rahul", value: 28500 },
+                      { custId: 331, custName: "Sneha", value: 28000 },
+                      { custId: 332, custName: "Vikas", value: 27000 },
+                      { custId: 333, custName: "Riya", value: 26500 },
+                      { custId: 334, custName: "Karan", value: 26000 },
+                      { custId: 335, custName: "Ayesha", value: 25500 },
+                      { custId: 336, custName: "Manish", value: 25000 },
+                      { custId: 337, custName: "Neha", value: 24500 },
+                      { custId: 338, custName: "Sahil", value: 24000 },
+                      { custId: 339, custName: "Divya", value: 23500 },
+                      { custId: 340, custName: "Rohit", value: 23000 },
+                      { custId: 341, custName: "Megha", value: 22500 },
+                      { custId: 342, custName: "Ankit", value: 22000 },
+                      { custId: 343, custName: "Simran", value: 21500 },
+                      { custId: 344, custName: "Deepak", value: 21000 },
+                    ];
+                  }
+                },
+                startAutoRefresh() {
+                  // localStorage.setItem('refreshInterval', seconds);
+                  this.clearAutoRefresh();
+                  this.refreshTimer = setInterval(
+                    this.autoRefresh,
+                    localStorage.getItem("refreshInterval") * 1000
+                  );
+                },
+                clearAutoRefresh() {
+                  if (this.refreshTimer) {
+                    clearInterval(this.refreshTimer);
+                    this.refreshTimer = null;
+                  }
+                },
+                autoRefresh() {
+                  this.isRefreshing = true;
+                  this.randomizeFundSummary();
+                  setTimeout(() => {
+                    this.isRefreshing = false;
+                  }, 800);
+                  window.location.reload();
+                },
+                manualRefresh() {
+                  this.isRefreshing = true;
+                  this.randomizeFundSummary();
+                  setTimeout(() => {
+                    this.isRefreshing = false;
+                  }, 800);
+                  window.location.reload();
+                },
+                changeRefreshInterval(event) {
+                  const seconds = parseInt(event.target.value);
+                  localStorage.setItem("refreshInterval", seconds);
+                  this.refreshIntervalChanged = true;
+                  this.startAutoRefresh();
+                },
+                // --- Core Logic for Tab Management ---
+                async loadChartsForTab(tabName) {
+                  this.destroyAllCharts();
+                  const theme = this.theme;
+                  if (tabName === "overview") {
+                    if (!this.branchBuckets) {
+                      this.overviewError = "No branch data loaded.";
+                      return;
+                    }
+                    this.overviewLoading = false;
+                    this.overviewError = null;
+                    this.overviewData = this.branchBuckets;
+                    this.createChart(
+                      "overview",
+                      "bar",
+                      "investorDistributionBarChart",
+                      this.getInvestorDistributionBarChartConfig(
+                        this.overviewData,
+                        theme
+                      ).data,
+                      this.getInvestorDistributionBarChartConfig(
+                        this.overviewData,
+                        theme
+                      ).options
+                    );
+                    return;
+                  } else {
+                    let currentData = {};
+                    if (tabName === "highRisk") {
+                      currentData = {
+                        "Small Cap Growth": 450000,
+                        "Tech Disruptors": 550000,
+                        "Emerging Market Equities": 300000,
+                        "High-Yield Bonds": 180000,
+                        "Biotech Innovation": 380000,
+                        "Future Tech Fund": 420000,
+                      };
+                    } else if (tabName === "midRisk") {
+                      currentData = {
+                        "Large Cap Diversified": 700000,
+                        "Balanced Mutual Fund": 600000,
+                        "Real Estate ETF": 350000,
+                        "Corporate Bonds (A-rated)": 400000,
+                        "International Developed Equities": 500000,
+                        "Gold & Commodities": 250000,
+                      };
+                    } else if (tabName === "lowRisk") {
+                      currentData = {
+                        "Government Securities": 900000,
+                        "AAA Corporate Bonds": 600000,
+                        "Money Market Funds": 400000,
+                        "Fixed Deposits": 250000,
+                        "Large Cap Dividend Stocks": 300000,
+                        "Ultra Short Duration Funds": 180000,
+                      };
+                    }
+            
+                    const chartsToCreate = [
+                      {
+                        id: `${tabName}BarChart`,
+                        type: "bar",
+                        config: this.getBarChartConfig(currentData, tabName, theme),
+                      },
+                      {
+                        id: `${tabName}PieChart`,
+                        type: "pie",
+                        config: this.getPieChartConfig(currentData, tabName, theme),
+                      },
+                      {
+                        id: `${tabName}LineChart`,
+                        type: "line",
+                        config: this.getLineChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                      {
+                        id: `${tabName}RadarChart`,
+                        type: "radar",
+                        config: this.getRadarChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                      {
+                        id: `${tabName}BubbleChart`,
+                        type: "bubble",
+                        config: this.getBubbleChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                      {
+                        id: `${tabName}AreaChart`,
+                        type: "line",
+                        config: this.getAreaChartConfig(
+                          currentData,
+                          tabName,
+                          theme
+                        ),
+                      },
+                    ];
+            
+                    chartsToCreate.forEach((chart) => {
+                      this.createChart(
+                        tabName,
+                        chart.type,
+                        chart.id,
+                        chart.config.data,
+                        chart.config.options
+                      );
+                    });
+                  }
+                },
+            
+                // Method to destroy ALL charts
+                destroyAllCharts() {
+                  for (const id in this.charts) {
+                    if (
+                      this.charts[id] &&
+                      typeof this.charts[id].destroy === "function"
+                    ) {
+                      this.charts[id].destroy();
+                      delete this.charts[id];
+                    }
+                  }
+                },
+                async fetchTopCustomers() {
+                  // Replace these URLs with your real API endpoints
+                  const userId = this.userId || "";
+                  const token = this.token || "";
+                  const branchNumber = this.branchNumber || "";
+                  const headers = token
+                    ? {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                      }
+                    : { "Content-Type": "application/json" };
+                  // Example endpoints (update as needed)
+                  const stockValueUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=StkValue&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  const derivativeExposureUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=DerivativeExposure&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  const marginShortfallUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=MarginShortFall&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  const VoilationUrl = `http://10.12.37.18:9459/riskOrchestrator/report/topCustomers?parameter=Voilation&limit=20&loginId=${userId}&branchCode=${branchNumber}`;
+                  try {
+                    // Fetch all three in parallel
+                    const [stockRes, derivativeRes, marginRes] = await Promise.all([
+                      fetch(stockValueUrl, { headers }),
+                      fetch(derivativeExposureUrl, { headers }),
+                      fetch(marginShortfallUrl, { headers }),
+                      fetch(VoilationUrl, { headers }),
+                    ]);
+                    if (stockRes.ok) {
+                      this.topCustomersStockValue = await stockRes.json();
+                    } else {
+                      throw new Error("Stock Value API error");
+                    }
+                    if (derivativeRes.ok) {
+                      this.topCustomersDerivativeExposure =
+                        await derivativeRes.json();
+                    } else {
+                      throw new Error("Derivative Exposure API error");
+                    }
+                    if (marginRes.ok) {
+                      this.topCustomersMarginShortfall = await marginRes.json();
+                    } else {
+                      throw new Error("Margin Shortfall API error");
+                    }
+                    if (VoilationRes.ok) {
+                      this.topCustomersVoilation = await VoilationRes.json();
+                    } else {
+                      throw new Error("Voilation API error");
+                    }
+                  } catch (e) {
+                    // Fallback to static dummy data if any API fails
+                    this.topCustomersStockValue = [
+                      { custId: 123, custName: "Shivam", value: 190072 },
+                      { custId: 125, custName: "Shubham", value: 180721 },
+                      { custId: 127, custName: "Tanishka", value: 171172 },
+                      { custId: 128, custName: "Amit", value: 165000 },
+                      { custId: 129, custName: "Priya", value: 162500 },
+                      { custId: 130, custName: "Rahul", value: 160000 },
+                      { custId: 131, custName: "Sneha", value: 158000 },
+                      { custId: 132, custName: "Vikas", value: 155000 },
+                      { custId: 133, custName: "Riya", value: 153000 },
+                      { custId: 134, custName: "Karan", value: 150000 },
+                      { custId: 135, custName: "Ayesha", value: 148000 },
+                      { custId: 136, custName: "Manish", value: 146000 },
+                      { custId: 137, custName: "Neha", value: 144000 },
+                      { custId: 138, custName: "Sahil", value: 142000 },
+                      { custId: 139, custName: "Divya", value: 140000 },
+                      { custId: 140, custName: "Rohit", value: 138000 },
+                      { custId: 141, custName: "Megha", value: 136000 },
+                      { custId: 142, custName: "Ankit", value: 134000 },
+                      { custId: 143, custName: "Simran", value: 132000 },
+                      { custId: 144, custName: "Deepak", value: 130000 },
+                    ];
+                    this.topCustomersDerivativeExposure = [
+                      { custId: 223, custName: "Shivam", value: 120000 },
+                      { custId: 225, custName: "Shubham", value: 110000 },
+                      { custId: 227, custName: "Tanishka", value: 105000 },
+                      { custId: 228, custName: "Amit", value: 98000 },
+                      { custId: 229, custName: "Priya", value: 97000 },
+                      { custId: 230, custName: "Rahul", value: 95000 },
+                      { custId: 231, custName: "Sneha", value: 94000 },
+                      { custId: 232, custName: "Vikas", value: 93000 },
+                      { custId: 233, custName: "Riya", value: 92000 },
+                      { custId: 234, custName: "Karan", value: 91000 },
+                      { custId: 235, custName: "Ayesha", value: 90000 },
+                      { custId: 236, custName: "Manish", value: 89000 },
+                      { custId: 237, custName: "Neha", value: 88000 },
+                      { custId: 238, custName: "Sahil", value: 87000 },
+                      { custId: 239, custName: "Divya", value: 86000 },
+                      { custId: 240, custName: "Rohit", value: 85000 },
+                      { custId: 241, custName: "Megha", value: 84000 },
+                      { custId: 242, custName: "Ankit", value: 83000 },
+                      { custId: 243, custName: "Simran", value: 82000 },
+                      { custId: 244, custName: "Deepak", value: 81000 },
+                    ];
+                    this.topCustomersMarginShortfall = [
+                      { custId: 323, custName: "Shivam", value: 35000 },
+                      { custId: 325, custName: "Shubham", value: 32000 },
+                      { custId: 327, custName: "Tanishka", value: 31000 },
+                      { custId: 328, custName: "Amit", value: 29500 },
+                      { custId: 329, custName: "Priya", value: 29000 },
+                      { custId: 330, custName: "Rahul", value: 28500 },
+                      { custId: 331, custName: "Sneha", value: 28000 },
+                      { custId: 332, custName: "Vikas", value: 27000 },
+                      { custId: 333, custName: "Riya", value: 26500 },
+                      { custId: 334, custName: "Karan", value: 26000 },
+                      { custId: 335, custName: "Ayesha", value: 25500 },
+                      { custId: 336, custName: "Manish", value: 25000 },
+                      { custId: 337, custName: "Neha", value: 24500 },
+                      { custId: 338, custName: "Sahil", value: 24000 },
+                      { custId: 339, custName: "Divya", value: 23500 },
+                      { custId: 340, custName: "Rohit", value: 23000 },
+                      { custId: 341, custName: "Megha", value: 22500 },
+                      { custId: 342, custName: "Ankit", value: 22000 },
+                      { custId: 343, custName: "Simran", value: 21500 },
+                      { custId: 344, custName: "Deepak", value: 21000 },
+                    ];
+                    this.topCustomersVoilation = [
+                      { custId: 323, custName: "Shivam", value: 93678159478534 },
+                      { custId: 325, custName: "Shubham", value: 32000 },
+                      { custId: 327, custName: "Tanishka", value: 31000 },
+                      { custId: 328, custName: "Amit", value: 29500 },
+                      { custId: 329, custName: "Priya", value: 29000 },
+                      { custId: 330, custName: "Rahul", value: 28500 },
+                      { custId: 331, custName: "Sneha", value: 28000 },
+                      { custId: 332, custName: "Vikas", value: 27000 },
+                      { custId: 333, custName: "Riya", value: 26500 },
+                      { custId: 334, custName: "Karan", value: 26000 },
+                      { custId: 335, custName: "Ayesha", value: 25500 },
+                      { custId: 336, custName: "Manish", value: 25000 },
+                      { custId: 337, custName: "Neha", value: 24500 },
+                      { custId: 338, custName: "Sahil", value: 24000 },
+                      { custId: 339, custName: "Divya", value: 23500 },
+                      { custId: 340, custName: "Rohit", value: 23000 },
+                      { custId: 341, custName: "Megha", value: 22500 },
+                      { custId: 342, custName: "Ankit", value: 22000 },
+                      { custId: 343, custName: "Simran", value: 21500 },
+                      { custId: 344, custName: "Deepak", value: 21000 },
+                    ];
+                  }
+                },
+                randomizeFundSummary() {
+                  // Generate random values in crores for each box
+                  this.fundSummaryBoxes = [
+                    {
+                      label: "Total Fund In",
+                      value: (Math.random() * 1000 + 100).toFixed(2),
+                    },
+                    {
+                      label: "Total Fund Out",
+                      value: (Math.random() * 800 + 50).toFixed(2),
+                    },
+                    {
+                      label: "Margin Shortfall",
+                      value: (Math.random() * 100 + 1).toFixed(2),
+                    },
+                  ];
+                },
+                // --- Auto Refresh Logic ---
+                // setRefreshInterval(seconds) {
+                // if (this.refreshTimer) clearInterval(this.refreshTimer);
+                // if (seconds > 0) {
+                // this.refreshTimer = setInterval(() => {
+                // location.reload();
+                // }, seconds * 1000);
+                // }
+                // },
+            
+                setRefreshInterval(seconds) {
+                  // Clear any existing interval to avoid duplicates
+                  if (this.refreshTimer) {
+                    clearInterval(this.refreshTimer);
+                  }
+            
+                  // Set a new interval if seconds is positive
+                  if (seconds > 0) {
+                    this.refreshTimer = setInterval(() => {
+                      location.reload();
+                    }, seconds * 1000);
+            
+                    // Store the interval in localStorage to reinitialize after reload
+                    localStorage.setItem("refreshInterval", seconds);
+                  } else {
+                    // Clear stored interval if seconds is 0 or negative
+                    // localStorage.removeItem('refreshInterval');
+                    localStorage.setItem("refreshInterval", 0);
+                  }
+                },
+            
+                // On load, set dropdown and timer from localStorage
+                initAutoRefresh() {
+                  const saved = localStorage.getItem("refreshInterval");
+                  document.getElementById("refresh-interval").value = saved;
+                  this.setRefreshInterval(Number(saved));
+                },
+              },
+              mounted() {
+                document.body.className = this.themeIsDark
+                  ? "dark-mode"
+                  : "light-mode";
+                // --- Parse userId and token from URL params on mount ---
+                const params = new URLSearchParams(window.location.search);
+                this.userId = params.get("U") || "";
+                this.token = params.get("T") || "";
+                // On initial load, fetch and show overall data for all branches
+                this.fetchOverallBranches();
+                // Fetch top customers for all three lists
+                this.fetchTopCustomers();
+                // Initialize auto-refresh setting
+                this.initAutoRefresh();
+                this.randomizeFundSummary();
+              },
+            });
+            
+            // Initialize the refresh interval on page load
+            window.addEventListener("load", () => {
+              const savedInterval = localStorage.getItem("refreshInterval");
+              if (savedInterval && parseInt(savedInterval) > 0) {
+                setRefreshInterval(parseInt(savedInterval));
+              }
+            });
+         </script>
+      </div>
+   </body>
+</html>
